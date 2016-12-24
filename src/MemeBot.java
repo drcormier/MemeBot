@@ -5,10 +5,12 @@ import net.dv8tion.jda.core.audio.hooks.ConnectionListener;
 import net.dv8tion.jda.core.audio.hooks.ConnectionStatus;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent;
+import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.managers.AudioManager;
 
@@ -22,6 +24,8 @@ public class MemeBot extends ListenerAdapter{
     public static boolean dc = false;
     // the object to lock onto
     public static Object lock = new Object();
+    // if airhorns are enabled
+    public static boolean airhornOn = true;
     // the list of airhorn solutions commands
     private final String[] airhorns = {
             "!airhorn default",
@@ -93,28 +97,43 @@ public class MemeBot extends ListenerAdapter{
      */
     @Override
     public void onGuildVoiceJoin(GuildVoiceJoinEvent event){
-        // ensure that we do not disconnect immediately after beginning a connection
-        dc = false;
-        Member mem = event.getMember();
-        // ensure joinee is not a bot
-        if(!mem.getUser().isBot()){
-            VoiceChannel voiceChan = event.getChannelJoined();
-            // connect to the voice channel
-            connectTo(voiceChan);
-            // wait a little bit
-            try{
-                Thread.sleep(1000);
-            }catch (InterruptedException e){
-                e.printStackTrace();
-            }
-            // send the message to the bot channel
-            Guild g = event.getGuild();
-            TextChannel chan = g.getTextChannelById("261176936510783488");
-            chan.sendMessage(getRandomAirhorn()).queue();
-            // wait to disconnect in a separate thrad
-            new Thread(() -> waitToDisconnect()).start();
-            
+        if(airhornOn){
+        	// ensure that we do not disconnect immediately after beginning a connection
+	        dc = false;
+	        Member mem = event.getMember();
+	        // ensure joinee is not a bot
+	        if(!mem.getUser().isBot()){
+	            VoiceChannel voiceChan = event.getChannelJoined();
+	            // connect to the voice channel
+	            connectTo(voiceChan);
+	            // wait a little bit
+	            try{
+	                Thread.sleep(1000);
+	            }catch (InterruptedException e){
+	                e.printStackTrace();
+	            }
+	            // send the message to the bot channel
+	            Guild g = event.getGuild();
+	            TextChannel chan = g.getTextChannelById("261176936510783488");
+	            chan.sendMessage(getRandomAirhorn()).queue();
+	            // wait to disconnect in a separate thrad
+	            new Thread(() -> waitToDisconnect()).start();
+	        }
         }
+    }
+    
+    @Override
+    public void onGuildMessageReceived(GuildMessageReceivedEvent event){
+    	Message m = event.getMessage();
+    	String s = m.getContent();
+    	if(s.equals("!MemeBot airhornOn")){
+    		airhornOn = true;
+    		m.getChannel().sendMessage("Airhorning enabled.").queue();
+    	}
+    	if(s.equals("!MemeBot airhornOff")){
+    		airhornOn = false;
+    		m.getChannel().sendMessage("Airhorning disabled.").queue();
+    	}
     }
 
     /**
