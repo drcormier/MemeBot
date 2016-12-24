@@ -5,9 +5,14 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 public class MemeBot extends ListenerAdapter{
 	
-	private static final String token = "MjYyMDY1NzIwMzQ1NjI0NTc3.Cz-DWQ.OAc46MCLG7QCLkqa3h_gw9aSJ24";
+	private static String token;
 	
 	public static void main(String[] args){
+        if(args.length != 1){
+            System.out.println("Usage: java MemeBot token");
+            System.exit(1);
+        }
+        token=args[0];
 		try{
 			JDA jda = new JDABuilder(AccountType.BOT)
 					.setToken(token)
