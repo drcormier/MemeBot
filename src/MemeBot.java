@@ -1,3 +1,5 @@
+import java.util.List;
+
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
@@ -6,6 +8,7 @@ import net.dv8tion.jda.core.audio.hooks.ConnectionStatus;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.entities.VoiceChannel;
@@ -126,14 +129,24 @@ public class MemeBot extends ListenerAdapter{
     public void onGuildMessageReceived(GuildMessageReceivedEvent event){
     	Message m = event.getMessage();
     	String s = m.getContent();
-    	if(s.equals("!MemeBot airhornOn")){
-    		airhornOn = true;
-    		m.getChannel().sendMessage("Airhorning enabled.").queue();
-    	}
-    	if(s.equals("!MemeBot airhornOff")){
-    		airhornOn = false;
-    		m.getChannel().sendMessage("Airhorning disabled.").queue();
-    	}
+        List<Role> r = m.getGuild().getRolesByName("Botnet Managers",false);
+        List<Member> mems = m.getGuild().getMembersWithRoles(r);
+
+        if(mems.contains(m.getGuild().getMember(m.getAuthor()))){
+            if(s.equals("!MemeBot airhornOn")){
+                airhornOn = true;
+                m.getChannel().sendMessage("Airhorning enabled.").queue();
+            }
+            if(s.equals("!MemeBot airhornOff")){
+                airhornOn = false;
+                m.getChannel().sendMessage("Airhorning disabled.").queue();
+            }
+            if(s.equals("!MemeBot shutdown")){
+                m.getChannel().sendMessage("Shutting down.").queue();
+                m.getJDA().shutdown();
+            }
+
+        }
     }
 
     /**
