@@ -1,3 +1,4 @@
+import java.io.File;
 import java.util.List;
 
 import net.dv8tion.jda.core.AccountType;
@@ -101,39 +102,49 @@ public class MemeBot extends ListenerAdapter{
     @Override
     public void onGuildVoiceJoin(GuildVoiceJoinEvent event){
         if(airhornOn){
-        	// ensure that we do not disconnect immediately after beginning a connection
-	        dc = false;
-	        Member mem = event.getMember();
-	        // ensure joinee is not a bot
-	        if(!mem.getUser().isBot()){
-	            VoiceChannel voiceChan = event.getChannelJoined();
-	            // connect to the voice channel
-	            connectTo(voiceChan);
-	            // wait a little bit
-	            try{
-	                Thread.sleep(1000);
-	            }catch (InterruptedException e){
-	                e.printStackTrace();
-	            }
-	            // send the message to the bot channel
-	            Guild g = event.getGuild();
-	            TextChannel chan = g.getTextChannelById("261176936510783488");
-	            chan.sendMessage(getRandomAirhorn()).queue();
-	            // wait to disconnect in a separate thrad
-	            new Thread(() -> waitToDisconnect()).start();
-	        }
+            // ensure that we do not disconnect immediately after beginning a connection
+            dc = false;
+            Member mem = event.getMember();
+            // ensure joinee is not a bot
+            if(!mem.getUser().isBot()){
+                VoiceChannel voiceChan = event.getChannelJoined();
+                // connect to the voice channel
+                connectTo(voiceChan);
+                // wait a little bit
+                try{
+                    Thread.sleep(1000);
+                }catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+                // send the message to the bot channel
+                Guild g = event.getGuild();
+                TextChannel chan = g.getTextChannelById("261176936510783488");
+                chan.sendMessage(getRandomAirhorn()).queue();
+                // wait to disconnect in a separate thrad
+                new Thread(() -> waitToDisconnect()).start();
+            }
         }
     }
     
     @Override
     public void onGuildMessageReceived(GuildMessageReceivedEvent event){
-    	Message m = event.getMessage();
-    	String s = m.getContent();
+        Message m = event.getMessage();
+        String s = m.getContent();
         List<Role> r = m.getGuild().getRolesByName("Botnet Managers",false);
         List<Member> mems = m.getGuild().getMembersWithRoles(r);
 
         if(s.equals("!MemeBot airhornStatus")){
             m.getChannel().sendMessage("Airhorning is "+ (airhornOn ? "enabled." : "disabled.")).queue();
+        }
+        if(m.getAuthor().getId().equals("107272630842728448")){
+            if(s.equals("!MemeBot meisennerd")){
+                try{
+                    File f = new File("data/meis.png");
+                    m.getChannel().sendFile(f,null).queue();
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
         }
 
         if(mems.contains(m.getGuild().getMember(m.getAuthor()))){
