@@ -1,4 +1,5 @@
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 
 import net.dv8tion.jda.core.AccountType;
@@ -9,6 +10,7 @@ import net.dv8tion.jda.core.audio.hooks.ConnectionStatus;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
@@ -73,6 +75,7 @@ public class MemeBot extends ListenerAdapter{
             "!bday sadhorn",
             "!bday weakhorn",
             "!wtc"};
+    private static HashMap<String,BotCommand> commands;
     
     public static void main(String[] args){
         if(args.length != 1){
@@ -81,6 +84,7 @@ public class MemeBot extends ListenerAdapter{
         }
         // add token from CLA
         token=args[0];
+        addCommands();
         // build instance of JDA
         try{
             JDA jda = new JDABuilder(AccountType.BOT)
@@ -130,38 +134,12 @@ public class MemeBot extends ListenerAdapter{
     public void onGuildMessageReceived(GuildMessageReceivedEvent event){
         Message m = event.getMessage();
         String s = m.getContent();
-        List<Role> r = m.getGuild().getRolesByName("Botnet Managers",false);
-        List<Member> mems = m.getGuild().getMembersWithRoles(r);
-
-        if(s.equals("!MemeBot airhornStatus")){
-            m.getChannel().sendMessage("Airhorning is "+ (airhornOn ? "enabled." : "disabled.")).queue();
-        }
-        if(m.getAuthor().getId().equals("107272630842728448")){
-            if(s.equals("!MemeBot meisennerd")){
-                try{
-                    File f = new File("data/meis.png");
-                    m.getChannel().sendFile(f,null).queue();
-                }catch(Exception e){
-                    e.printStackTrace();
-                }
-            }
+        Member mem = m.getGuild().getMember(m.getAuthor());
+        MessageChannel chan = m.getChannel();
+        if(commands.containsKey(s)){
+            parseCommands(commands.get(s),mem,chan);
         }
 
-        if(mems.contains(m.getGuild().getMember(m.getAuthor()))){
-            if(s.equals("!MemeBot airhornOn")){
-                airhornOn = true;
-                m.getChannel().sendMessage("Airhorning enabled.").queue();
-            }
-            if(s.equals("!MemeBot airhornOff")){
-                airhornOn = false;
-                m.getChannel().sendMessage("Airhorning disabled.").queue();
-            }
-            if(s.equals("!MemeBot shutdown")){
-                m.getChannel().sendMessage("Shutting down.").queue();
-                m.getJDA().shutdown();
-            }
-
-        }
     }
 
     /**
@@ -213,6 +191,71 @@ public class MemeBot extends ListenerAdapter{
 
         }
     }
+
+    private void parseCommands(BotCommand com, Member user, MessageChannel chan){
+        boolean bm = false;
+        List<Role> r = user.getGuild().getRolesByName("Botnet Managers",false);
+        List<Member> mems = user.getGuild().getMembersWithRoles(r);
+        if(mems.contains(user)){
+            bm = true;
+        } 
+        switch(com){
+            case AIRHORN_ON:
+                if(bm){
+                    airhornOn = true;
+                    chan.sendMessage("Airhorning enabled.").queue();
+                }
+                break;
+            case AIRHORN_OFF:
+                if(bm){
+                    airhornOn = false;
+                    chan.sendMessage("Airhorning disabled.").queue();
+                }
+                break;
+            case AIRHORN_STATUS:
+                chan.sendMessage("Airhorning is "+ (airhornOn ? "enabled." : "disabled.")).queue();
+                break;
+            case MEISENNERD:
+                if(user.getUser().getId().equals("107272630842728448")){
+                    try{
+                        File f = new File("data/meis.png");
+                        chan.sendFile(f,null).queue();
+                    }catch(Exception e){
+                        e.printStackTrace();
+                    }
+                }
+                break;
+            case COMMAND_LIST:
+                printCommands(chan);
+            case SHUTDOWN:
+                if(bm){
+                    chan.sendMessage("Shutting down.").queue();
+                    chan.getJDA().shutdown();
+                }
+
+        }
+    }
+
+    private static void addCommands(){
+        if(commands == null){
+            commands = new HashMap<>();
+            commands.put("!MemeBot airhornOn",BotCommand.AIRHORN_ON);
+            commands.put("!MemeBot airhornOff",BotCommand.AIRHORN_OFF);
+            commands.put("!MemeBot airhornStatus",BotCommand.AIRHORN_STATUS);
+            commands.put("!MemeBot meisennerd",BotCommand.MEISENNERD);
+            commands.put("!MemeBot commands",BotCommand.COMMAND_LIST);
+            commands.put("!MemeBot shutdown",BotCommand.SHUTDOWN);
+        }
+    }
+
+    private void printCommands(MessageChannel mc){
+        String temp="";
+        for(String c : commands.keySet()){
+            temp = temp + "\n" + c;
+        }
+        System.out.println(temp);
+        mc.sendMessage(temp).queue();
+    }
 }
 
 /**
@@ -253,4 +296,9 @@ class MemeListener implements ConnectionListener{
         //System.out.println(arg0 + " " + arg1);  
     }
 
+}
+
+enum BotCommand{
+    AIRHORN_ON, AIRHORN_OFF, AIRHORN_STATUS,
+    MEISENNERD, COMMAND_LIST, SHUTDOWN
 }
