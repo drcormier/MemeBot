@@ -1,7 +1,9 @@
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
+import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import net.dv8tion.jda.core.managers.AudioManager;
 
 public class MemeBot extends ListenerAdapter{
 	
@@ -23,4 +25,15 @@ public class MemeBot extends ListenerAdapter{
 			e.printStackTrace();
 		}
 	}
+
+    private void connectTo(VoiceChannel channel){
+        AudioManager manager = channel.getGuild().getAudioManager();
+        manager.openAudioConnection(channel);
+    }
+
+    private void disconnectFrom(VoiceChannel channel){
+        AudioManager manager = channel.getGuild().getAudioManager();
+        manager.closeAudioConnection();
+        
+    }
 }
