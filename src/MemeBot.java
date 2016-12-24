@@ -132,10 +132,11 @@ public class MemeBot extends ListenerAdapter{
         List<Role> r = m.getGuild().getRolesByName("Botnet Managers",false);
         List<Member> mems = m.getGuild().getMembersWithRoles(r);
 
+        if(s.equals("!MemeBot airhornStatus")){
+            m.getChannel().sendMessage("Airhorning is "+ (airhornOn ? "enabled." : "disabled.")).queue();
+        }
+
         if(mems.contains(m.getGuild().getMember(m.getAuthor()))){
-            if(s.equals("!MemeBot airhornStatus")){
-                m.getChannel().sendMessage("Airhorning is "+ (airhornOn ? "enabled." : "disabled.")).queue();
-            }
             if(s.equals("!MemeBot airhornOn")){
                 airhornOn = true;
                 m.getChannel().sendMessage("Airhorning enabled.").queue();
