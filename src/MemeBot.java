@@ -101,9 +101,9 @@ public class MemeBot extends ListenerAdapter{
      */
     @Override
     public void onGuildVoiceJoin(GuildVoiceJoinEvent event){
+        dc = false;
         if(airhornOn){
             // ensure that we do not disconnect immediately after beginning a connection
-            dc = false;
             Member mem = event.getMember();
             // ensure joinee is not a bot
             if(!mem.getUser().isBot()){
@@ -236,6 +236,11 @@ class MemeListener implements ConnectionListener{
         if(arg0.equals(ConnectionStatus.CONNECTED)){
             // tell the disconnect thread to disconnect
             synchronized(MemeBot.lock){
+                try{
+                    Thread.sleep(100);
+                }catch (InterruptedException e){
+                    e.printStackTrace();
+                }
                 MemeBot.dc = true;
                 MemeBot.lock.notifyAll();
             }
