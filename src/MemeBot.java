@@ -227,12 +227,16 @@ public class MemeBot extends ListenerAdapter{
                 break;
             case COMMAND_LIST:
                 printCommands(chan);
+                break;
             case SHUTDOWN:
                 if(bm){
                     chan.sendMessage("Shutting down.").queue();
                     chan.getJDA().shutdown();
                 }
-
+                break;
+            case AIRHORN_COMMANDS:
+                printAirhorn(chan);
+                break;
         }
     }
 
@@ -245,15 +249,23 @@ public class MemeBot extends ListenerAdapter{
             commands.put("!MemeBot meisennerd",BotCommand.MEISENNERD);
             commands.put("!MemeBot commands",BotCommand.COMMAND_LIST);
             commands.put("!MemeBot shutdown",BotCommand.SHUTDOWN);
+            commands.put("!MemeBot airhornCommands",BotCommand.AIRHORN_COMMANDS);
         }
     }
 
     private void printCommands(MessageChannel mc){
-        String temp="";
+        String temp="Current MemeBot commands:\n";
         for(String c : commands.keySet()){
             temp = temp + "\n" + c;
         }
-        System.out.println(temp);
+        mc.sendMessage(temp).queue();
+    }
+
+    private void printAirhorn(MessageChannel mc){
+        String temp="Current airhorn commands:\n";
+        for(String c : airhorns){
+            temp = temp + "\n" + c;
+        }
         mc.sendMessage(temp).queue();
     }
 }
@@ -300,5 +312,6 @@ class MemeListener implements ConnectionListener{
 
 enum BotCommand{
     AIRHORN_ON, AIRHORN_OFF, AIRHORN_STATUS,
-    MEISENNERD, COMMAND_LIST, SHUTDOWN
+    MEISENNERD, COMMAND_LIST, SHUTDOWN,
+    AIRHORN_COMMANDS
 }
