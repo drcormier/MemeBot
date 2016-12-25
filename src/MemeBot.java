@@ -255,8 +255,9 @@ public class MemeBot extends ListenerAdapter{
 
     private void printCommands(MessageChannel mc){
         String temp="Current MemeBot commands:\n";
+        temp = temp + "**NOTE:** If the command is **bold** then the command is restricted in use.\n";
         for(String c : commands.keySet()){
-            temp = temp + "\n" + c;
+            temp = temp + "\n" + (commands.get(c).isRestricted() ? "**" : "") + c + (commands.get(c).isRestricted() ? " **" : "");
         }
         mc.sendMessage(temp).queue();
     }
@@ -311,7 +312,18 @@ class MemeListener implements ConnectionListener{
 }
 
 enum BotCommand{
-    AIRHORN_ON, AIRHORN_OFF, AIRHORN_STATUS,
-    MEISENNERD, COMMAND_LIST, SHUTDOWN,
-    AIRHORN_COMMANDS
+    AIRHORN_ON (true),
+    AIRHORN_OFF (true),
+    AIRHORN_STATUS (false),
+    MEISENNERD (true),
+    COMMAND_LIST (false),
+    SHUTDOWN (true),
+    AIRHORN_COMMANDS (false);
+
+    BotCommand(boolean r){
+        restricted=r;
+    }
+
+    private final boolean restricted;
+    boolean isRestricted(){return restricted;}
 }
