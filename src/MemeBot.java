@@ -76,6 +76,7 @@ public class MemeBot extends ListenerAdapter{
             "!bday weakhorn",
             "!wtc"};
     private static HashMap<String,BotCommand> commands;
+    private static HashMap<BotCommand,String> commandDescriptions;
     
     public static void main(String[] args){
         if(args.length != 1){
@@ -237,29 +238,56 @@ public class MemeBot extends ListenerAdapter{
             case AIRHORN_COMMANDS:
                 printAirhorn(chan);
                 break;
+            case AIRHORN_COMMANDS_DESCRIPTIONS:
+                printCommandsAndDescriptions(chan);
+                break;
         }
     }
 
     private static void addCommands(){
-        if(commands == null){
+        if(commands == null && commandDescriptions == null){
             commands = new HashMap<>();
+            commandDescriptions = new HashMap<>();
             commands.put("!MemeBot airhornOn",BotCommand.AIRHORN_ON);
+            commandDescriptions.put(BotCommand.AIRHORN_ON, "Enable the airhorn functionality of MemeBot");
             commands.put("!MemeBot airhornOff",BotCommand.AIRHORN_OFF);
+            commandDescriptions.put(BotCommand.AIRHORN_OFF, "Disable the airhorn functionality of MemeBot");
             commands.put("!MemeBot airhornStatus",BotCommand.AIRHORN_STATUS);
+            commandDescriptions.put(BotCommand.AIRHORN_STATUS, "Check the airhorn functionality status of MemeBot");
             commands.put("!MemeBot meisennerd",BotCommand.MEISENNERD);
+            commandDescriptions.put(BotCommand.MEISENNERD, "Print a picture of Ben");
             commands.put("!MemeBot commands",BotCommand.COMMAND_LIST);
+            commandDescriptions.put(BotCommand.COMMAND_LIST, "Print a list of MemeBot commands");
             commands.put("!MemeBot shutdown",BotCommand.SHUTDOWN);
+            commandDescriptions.put(BotCommand.SHUTDOWN, "Shut down MemeBot");
             commands.put("!MemeBot airhornCommands",BotCommand.AIRHORN_COMMANDS);
+            commandDescriptions.put(BotCommand.AIRHORN_COMMANDS, "Print a list of Airhorn Solutions commands");
+            commands.put("!MemeBot com+desc",BotCommand.AIRHORN_COMMANDS_DESCRIPTIONS);
+            commandDescriptions.put(BotCommand.AIRHORN_COMMANDS_DESCRIPTIONS, "Prints a list of MemeBot commands and their descriptions");
         }
     }
 
     private void printCommands(MessageChannel mc){
-        String temp="Current MemeBot commands:\n";
-        temp = temp + "**NOTE:** If the command is **bold** then the command is restricted in use.\n";
+        String temp = "**NOTE:** If the command is __underlined__ then the command is restricted in use.\n";
+        temp = temp + "*for descriptions of the commands, use* `!MemeBot com+desc`\n";
+        temp = temp + "Current MemeBot commands:\n";
         for(String c : commands.keySet()){
-            temp = temp + "\n" + (commands.get(c).isRestricted() ? "**" : "") + c + (commands.get(c).isRestricted() ? " **" : "");
+            temp = temp + "\n" + (commands.get(c).isRestricted() ? "__" : "") + "`" + c + "`" + (commands.get(c).isRestricted() ? "__" : "");
         }
         mc.sendMessage(temp).queue();
+    }
+
+    private void printCommandsAndDescriptions(MessageChannel mc){
+        String temp = "**NOTE:** If the command is __underlined__ then the command is restricted in use.\n";
+        temp = temp + "Current MemeBot commands:\n";
+        for(String c : commands.keySet()){
+            temp = temp + "\n" + (commands.get(c).isRestricted() ? "__" : "") + "`" + c + "`" + (commands.get(c).isRestricted() ? "__" : "");
+            if(commandDescriptions.containsKey(commands.get(c))){
+                temp = temp + "\n" + "\t\t" + commandDescriptions.get(commands.get(c));
+            }
+        }
+        mc.sendMessage(temp).queue();
+
     }
 
     private void printAirhorn(MessageChannel mc){
@@ -318,7 +346,8 @@ enum BotCommand{
     MEISENNERD (true),
     COMMAND_LIST (false),
     SHUTDOWN (true),
-    AIRHORN_COMMANDS (false);
+    AIRHORN_COMMANDS (false),
+    AIRHORN_COMMANDS_DESCRIPTIONS (false);
 
     BotCommand(boolean r){
         restricted=r;
