@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 
@@ -248,8 +249,8 @@ public class MemeBot extends ListenerAdapter{
             case MEISENNERD: // !MemeBot meisennerd
                 if(user.getUser().getId().equals("107272630842728448")){
                     try{
-                        File f = new File("data/meis.png");
-                        chan.sendFile(f,null).queue();
+                        InputStream stream = MemeBot.class.getResourceAsStream("meis.png");
+                        chan.sendFile(stream, "meis.png", null);
                     }catch(Exception e){
                         e.printStackTrace();
                     }
