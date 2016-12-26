@@ -270,6 +270,15 @@ public class MemeBot extends ListenerAdapter{
             case AIRHORN_COMMANDS_DESCRIPTIONS: // !MemeBot com+desc
                 printCommandsAndDescriptions(chan);
                 break;
+            case CHRISTMAS: // !MemeBot christmas
+                    try{
+                        File f = new File("data/reindeer.png");
+                        chan.sendFile(f,null).queue();
+                    }catch(Exception e){
+                        e.printStackTrace();
+                    }
+                    break;
+
         }
     }
 
@@ -303,6 +312,8 @@ public class MemeBot extends ListenerAdapter{
             commandDescriptions.put(BotCommand.AIRHORN_COMMANDS, "Print a list of Airhorn Solutions commands");
             commands.put("!MemeBot com+desc",BotCommand.AIRHORN_COMMANDS_DESCRIPTIONS);
             commandDescriptions.put(BotCommand.AIRHORN_COMMANDS_DESCRIPTIONS, "Prints a list of MemeBot commands and their descriptions");
+            commands.put("!MemeBot christmas",BotCommand.CHRISTMAS);
+            commandDescriptions.put(BotCommand.CHRISTMAS, "Prints a christmas picture");
         }
     }
 
@@ -435,7 +446,8 @@ enum BotCommand{
     COMMAND_LIST (false),
     SHUTDOWN (true),
     AIRHORN_COMMANDS (false),
-    AIRHORN_COMMANDS_DESCRIPTIONS (false);
+    AIRHORN_COMMANDS_DESCRIPTIONS (false),
+    CHRISTMAS (false);
 
     // constructor for saving restricted state
     BotCommand(boolean r){
