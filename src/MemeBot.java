@@ -11,6 +11,7 @@ import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.audio.hooks.ConnectionListener;
 import net.dv8tion.jda.core.audio.hooks.ConnectionStatus;
+import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.GuildVoiceState;
 import net.dv8tion.jda.core.entities.Member;
@@ -151,6 +152,7 @@ public class MemeBot extends ListenerAdapter{
                     .setToken(token)
                     .addListener(new MemeBot(l))
                     .buildBlocking();
+            jda.getPresence().setGame(Game.of("Meme Maker 2017"));
         }
         catch(Exception e){
             e.printStackTrace();
