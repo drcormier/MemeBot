@@ -520,6 +520,7 @@ class MemeListener implements ConnectionListener{
 
 }
 
+
 /**
  * Enum specifying the type of command being sent by the user.
  * Contains a boolean value restricted, denoting if the command is restricted
@@ -537,7 +538,7 @@ enum BotCommand{
     COMMAND_LIST (false),
     SHUTDOWN (true),
     AIRHORN_COMMANDS (false),
-    COMMANDS_DESCRIPTIONS (false),
+    COMMANDS_DESCRIPTIONS (false);
 
     // constructor for saving restricted state
     BotCommand(boolean r){
