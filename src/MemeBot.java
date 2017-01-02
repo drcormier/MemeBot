@@ -1,7 +1,10 @@
-import java.io.File;
 import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
@@ -9,6 +12,7 @@ import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.audio.hooks.ConnectionListener;
 import net.dv8tion.jda.core.audio.hooks.ConnectionStatus;
 import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.GuildVoiceState;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
@@ -18,10 +22,16 @@ import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.core.exceptions.PermissionException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.managers.AudioManager;
+import net.dv8tion.jda.core.managers.GuildController;
 
 public class MemeBot extends ListenerAdapter{
+
+    private static final String COMMAND = "!MemeBot";
+
+    private final boolean log;
     
     // the token associated with the bot
     private static String token;
@@ -34,7 +44,7 @@ public class MemeBot extends ListenerAdapter{
     // if airhorns are enabled
     public static boolean airhornOn = true;
     // the list of airhorn solutions commands
-    private final String[] airhorns = {
+    private static final String[] airhorns = {
             "!airhorn default",
             "!airhorn reverb",
             "!airhorn spam",
@@ -76,30 +86,43 @@ public class MemeBot extends ListenerAdapter{
             "!bday sadhorn",
             "!bday weakhorn",
             "!wtc"};
+    
     // map of commands
     private static HashMap<String,BotCommand> commands;
     // map of command descriptions
     private static HashMap<BotCommand,String> commandDescriptions;
     
     public static void main(String[] args){
-        if(args.length != 1){
+        boolean l = false;
+        if(args.length < 1){
             System.out.println("Usage: java -jar MemeBot.jar token");
             System.exit(1);
         }
         // add token from CLA
         token=args[0];
+        if(args.length == 2){
+            l=Boolean.parseBoolean(args[1]);
+        }
         // add commands to the maps
         addCommands();
         // build instance of JDA
         try{
             JDA jda = new JDABuilder(AccountType.BOT)
                     .setToken(token)
-                    .addListener(new MemeBot())
+                    .addListener(new MemeBot(l))
                     .buildBlocking();
         }
         catch(Exception e){
             e.printStackTrace();
         }
+    }
+
+    public MemeBot(){
+        this.log=false;
+    }
+
+    public MemeBot(boolean log){
+        this.log=log;
     }
     
     /**
@@ -149,10 +172,17 @@ public class MemeBot extends ListenerAdapter{
     public void onGuildMessageReceived(GuildMessageReceivedEvent event){
         Message m = event.getMessage();
         String s = m.getContent();
+        String[] message = s.split(" ");
         Member mem = m.getGuild().getMember(m.getAuthor());
         MessageChannel chan = m.getChannel();
-        if(commands.containsKey(s)){
-            parseCommands(commands.get(s),mem,chan);
+        if(message[0].equals(COMMAND)){
+            if(commands.containsKey(message[1])){
+                printLogMessage(mem.getNickname() + " sent the command " + commands.get(message[1]));
+                parseCommands(commands.get(message[1]),mem,chan,m);
+            }else{
+                chan.sendMessage("ERROR: `" + s + "` is not a command!\nTo see a list of commands, type `!MemeBot commands`").queue();
+            }
+
         }
 
     }
@@ -167,7 +197,7 @@ public class MemeBot extends ListenerAdapter{
             manager = channel.getGuild().getAudioManager();
         }
         // make a new connection listener instance
-        MemeListener ml = new MemeListener();
+        MemeListener ml = new MemeListener(channel.getGuild(),this);
         // give the audiomanager the connection listener
         manager.setConnectionListener(ml);
         // open audio connection
@@ -214,7 +244,7 @@ public class MemeBot extends ListenerAdapter{
      * @param user the user issuing the command. Used to determine permissions for restricted commands.
      * @param chan the MessageChannel that the command is given in. Used for the bot to respond to the commands.
      */
-    private void parseCommands(BotCommand com, Member user, MessageChannel chan){
+    private void parseCommands(BotCommand com, Member user, MessageChannel chan, Message mess){
         /* Most of the restricted commands (like shutdown) are restricted to users
          * with the "Botnet Managers" role. As such, when parsing  commands, we check
          * if the user making the request has that role before allowing them to use
@@ -268,7 +298,7 @@ public class MemeBot extends ListenerAdapter{
             case AIRHORN_COMMANDS: // !MemeBot airhornCommands
                 printAirhorn(chan);
                 break;
-            case AIRHORN_COMMANDS_DESCRIPTIONS: // !MemeBot com+desc
+            case COMMANDS_DESCRIPTIONS: // !MemeBot com+desc
                 printCommandsAndDescriptions(chan);
                 break;
         }
@@ -288,22 +318,29 @@ public class MemeBot extends ListenerAdapter{
             commands = new HashMap<>();
             commandDescriptions = new HashMap<>();
             // add the commands
-            commands.put("!MemeBot airhornOn",BotCommand.AIRHORN_ON);
+            commands.put("airhornOn",BotCommand.AIRHORN_ON);
             commandDescriptions.put(BotCommand.AIRHORN_ON, "Enable the airhorn functionality of MemeBot");
-            commands.put("!MemeBot airhornOff",BotCommand.AIRHORN_OFF);
+
+            commands.put("airhornOff",BotCommand.AIRHORN_OFF);
             commandDescriptions.put(BotCommand.AIRHORN_OFF, "Disable the airhorn functionality of MemeBot");
-            commands.put("!MemeBot airhornStatus",BotCommand.AIRHORN_STATUS);
+
+            commands.put("airhornStatus",BotCommand.AIRHORN_STATUS);
             commandDescriptions.put(BotCommand.AIRHORN_STATUS, "Check the airhorn functionality status of MemeBot");
-            commands.put("!MemeBot meisennerd",BotCommand.MEISENNERD);
+
+            commands.put("meisennerd",BotCommand.MEISENNERD);
             commandDescriptions.put(BotCommand.MEISENNERD, "Print a picture of Ben");
-            commands.put("!MemeBot commands",BotCommand.COMMAND_LIST);
+
+            commands.put("commands",BotCommand.COMMAND_LIST);
             commandDescriptions.put(BotCommand.COMMAND_LIST, "Print a list of MemeBot commands");
-            commands.put("!MemeBot shutdown",BotCommand.SHUTDOWN);
+
+            commands.put("shutdown",BotCommand.SHUTDOWN);
             commandDescriptions.put(BotCommand.SHUTDOWN, "Shut down MemeBot");
-            commands.put("!MemeBot airhornCommands",BotCommand.AIRHORN_COMMANDS);
+
+            commands.put("airhornCommands",BotCommand.AIRHORN_COMMANDS);
             commandDescriptions.put(BotCommand.AIRHORN_COMMANDS, "Print a list of Airhorn Solutions commands");
-            commands.put("!MemeBot com+desc",BotCommand.AIRHORN_COMMANDS_DESCRIPTIONS);
-            commandDescriptions.put(BotCommand.AIRHORN_COMMANDS_DESCRIPTIONS, "Prints a list of MemeBot commands and their descriptions");
+
+            commands.put("com+desc",BotCommand.COMMANDS_DESCRIPTIONS);
+            commandDescriptions.put(BotCommand.COMMANDS_DESCRIPTIONS, "Prints a list of MemeBot commands and their descriptions");
         }
     }
 
@@ -362,6 +399,33 @@ public class MemeBot extends ListenerAdapter{
         }
         mc.sendMessage(temp).queue();
     }
+
+    /**
+     * Log a message to the console.
+     * The message will take the format: [HH:mm:ss] [level] message
+     * @param level the level of the message
+     * @param message the message to be logged
+     */
+    private void printConsoleMessage(LogLevel level, String message){
+        if(log){
+            LocalDateTime date = LocalDateTime.now();
+            DateTimeFormatter form = DateTimeFormatter.ofPattern("HH:mm:ss");
+            String time = date.format(form);
+            String output = "[" + time + "] ";
+            output += "[" + level + "] ";
+            output += message;
+            System.out.println(output);
+        }
+    }
+
+    /**
+     * Log a message to the console, defaulting to the "LOG" level.
+     * The message will take the format: [HH:mm:ss] [LOG] message
+     * @param message the message to be logged
+     */
+    private void printLogMessage(String message){
+        printConsoleMessage(LogLevel.LOG,message);
+    }
 }
 
 /**
@@ -372,6 +436,15 @@ public class MemeBot extends ListenerAdapter{
  * @author Cosmo Viola
  */
 class MemeListener implements ConnectionListener{
+
+    Guild guild;
+
+    MemeBot memes;
+
+    public MemeListener(Guild g, MemeBot m){
+        guild=g;
+        memes=m;
+    }
 
     /**
      * Execute code on change in ping (presumably).
@@ -417,6 +490,34 @@ class MemeListener implements ConnectionListener{
     public void onUserSpeaking(User arg0, boolean arg1) {
     }
 
+    /**
+     * @return the guild
+     */
+    public Guild getGuild() {
+        return guild;
+    }
+
+    /**
+     * @param guild the guild to set
+     */
+    public void setGuild(Guild guild) {
+        this.guild = guild;
+    }
+
+    /**
+     * @return the memes
+     */
+    public MemeBot getMemes() {
+        return memes;
+    }
+
+    /**
+     * @param memes the memes to set
+     */
+    public void setMemes(MemeBot memes) {
+        this.memes = memes;
+    }
+
 }
 
 /**
@@ -436,7 +537,7 @@ enum BotCommand{
     COMMAND_LIST (false),
     SHUTDOWN (true),
     AIRHORN_COMMANDS (false),
-    AIRHORN_COMMANDS_DESCRIPTIONS (false);
+    COMMANDS_DESCRIPTIONS (false),
 
     // constructor for saving restricted state
     BotCommand(boolean r){
@@ -446,4 +547,11 @@ enum BotCommand{
     // store and access restricted state
     private final boolean restricted;
     boolean isRestricted(){return restricted;}
+}
+
+enum LogLevel{
+    INFO,
+    LOG,
+    WARNING,
+    ERROR
 }
