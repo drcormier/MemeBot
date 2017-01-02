@@ -44,7 +44,7 @@ public class MemeBot extends ListenerAdapter{
     // if airhorns are enabled
     public static boolean airhornOn = true;
     // the list of airhorn solutions commands
-    private static final String[] airhorns = {
+    private static final String[] airhornCommands = {
             "!airhorn default",
             "!airhorn reverb",
             "!airhorn spam",
@@ -83,6 +83,46 @@ public class MemeBot extends ListenerAdapter{
             "!stan x3",
             "!bday horn",
             "!bday horn3",
+            "!bday sadhorn",
+            "!bday weakhorn",
+            "!wtc"};
+
+    // list of commands used in random command selection
+    private static final String[] airhorns = {
+            "!airhorn default",
+            "!airhorn reverb",
+            "!airhorn spam",
+            "!airhorn tripletap",
+            "!airhorn fourtap",
+            "!airhorn distant",
+            "!airhorn echo",
+            "!airhorn clownfull",
+            "!airhorn clownshort",
+            "!airhorn clownspam",
+            "!airhorn highfartlong",
+            "!airhorn highfartshort",
+            "!airhorn midshort",
+            "!airhorn truck",
+            "!anotha one",
+            "!anotha one_classic",
+            "!anotha one_echo",
+            "!cena airhorn",
+            "!cena full",
+            "!cena jc",
+            "!cena nameis",
+            "!cena spam",
+            "!eb areyou_classic",
+            "!eb areyou_condensed",
+            "!eb areyou_crazy",
+            "!eb areyou_ethan",
+            "!eb classic",
+            "!eb echo",
+            "!eb high",
+            "!eb slowandlow",
+            "!eb sodiepop",
+            "!stan herd",
+            "!stan moo",
+            "!bday horn",
             "!bday sadhorn",
             "!bday weakhorn",
             "!wtc"};
@@ -211,7 +251,7 @@ public class MemeBot extends ListenerAdapter{
      */
     private String getRandomAirhorn(){
         int randInt = (int) (airhorns.length*Math.random());
-        return airhorns[randInt];
+        return airhornCommands[randInt];
     }
 
     /**
@@ -394,7 +434,7 @@ public class MemeBot extends ListenerAdapter{
     private void printAirhorn(MessageChannel mc){
         String temp="Current airhorn commands:\n";
         // iterate over commands in airhorn commands array
-        for(String c : airhorns){
+        for(String c : airhornCommands){
             temp = temp + "\n" + c;
         }
         mc.sendMessage(temp).queue();
