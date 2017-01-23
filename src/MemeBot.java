@@ -2,9 +2,7 @@ import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
@@ -13,7 +11,6 @@ import net.dv8tion.jda.core.audio.hooks.ConnectionListener;
 import net.dv8tion.jda.core.audio.hooks.ConnectionStatus;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.GuildVoiceState;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
@@ -23,10 +20,8 @@ import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.core.exceptions.PermissionException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.managers.AudioManager;
-import net.dv8tion.jda.core.managers.GuildController;
 
 public class MemeBot extends ListenerAdapter{
 
@@ -401,7 +396,7 @@ public class MemeBot extends ListenerAdapter{
             /* add the commands to a temp string. If the command is restricted, the command will be underlined (surrounded by __ in discord markdown).
              * In addition, the command itself will be placed inside of a code block (surrounded by ` in discord).
              */
-            temp = temp + "\n" + (commands.get(c).isRestricted() ? "__" : "") + "`" + c + "`" + (commands.get(c).isRestricted() ? "__" : "");
+            temp = temp + "\n" + (commands.get(c).isRestricted() ? "__" : "") + "`" +COMMAND + " " + c + "`" + (commands.get(c).isRestricted() ? "__" : "");
         }
         // send the message
         mc.sendMessage(temp).queue();
@@ -417,7 +412,7 @@ public class MemeBot extends ListenerAdapter{
         String temp = "**NOTE:** If the command is __underlined__ then the command is restricted in use.\n";
         temp = temp + "Current MemeBot commands:\n";
         for(String c : commands.keySet()){
-            temp = temp + "\n" + (commands.get(c).isRestricted() ? "__" : "") + "`" + c + "`" + (commands.get(c).isRestricted() ? "__" : "");
+            temp = temp + "\n" + (commands.get(c).isRestricted() ? "__" : "") + "`" +COMMAND + " " + c + "`" + (commands.get(c).isRestricted() ? "__" : "");
             // add the descriptions for the commands (if they exist)
             if(commandDescriptions.containsKey(commands.get(c))){
                 temp = temp + "\n" + "\t\t" + commandDescriptions.get(commands.get(c));
