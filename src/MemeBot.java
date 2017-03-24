@@ -200,7 +200,7 @@ public class MemeBot extends ListenerAdapter{
             }
 
         }
-        else if(harassBen && mem.getUser().getId().equals("113083366961577984")){
+        else if(harassBen && mem.getUser().getId().equals("107272630842728448")){
             chan.sendMessage("Did you mean to type `!MemeBot meisennerd`?").queue();
         }
 
