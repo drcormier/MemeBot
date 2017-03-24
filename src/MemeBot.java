@@ -39,6 +39,7 @@ public class MemeBot extends ListenerAdapter{
     public static Object lock = new Object();
     // if airhorns are enabled
     public static boolean airhornOn = true;
+    public static boolean harassBen = false;
     // the list of airhorn solutions commands
     private static final String[] airhornCommands = {
             "!airhorn default",
@@ -147,7 +148,7 @@ public class MemeBot extends ListenerAdapter{
                     .setToken(token)
                     .addListener(new MemeBot(l))
                     .buildBlocking();
-            jda.getPresence().setGame(Game.of("Meme Maker 2017"));
+            jda.getPresence().setGame(Game.of("with dank memes"));
         }
         catch(Exception e){
             e.printStackTrace();
@@ -172,29 +173,7 @@ public class MemeBot extends ListenerAdapter{
      */
     @Override
     public void onGuildVoiceJoin(GuildVoiceJoinEvent event){
-        dc = false;
-        if(airhornOn){
-            // ensure that we do not disconnect immediately after beginning a connection
-            Member mem = event.getMember();
-            // ensure joinee is not a bot
-            if(!mem.getUser().isBot()){
-                VoiceChannel voiceChan = event.getChannelJoined();
-                // connect to the voice channel
-                connectTo(voiceChan);
-                // wait a little bit
-                try{
-                    Thread.sleep(1000);
-                }catch (InterruptedException e){
-                    e.printStackTrace();
-                }
-                // send the message to the bot channel
-                Guild g = event.getGuild();
-                TextChannel chan = g.getTextChannelById("261176936510783488");
-                chan.sendMessage(getRandomAirhorn()).queue();
-                // wait to disconnect in a separate thrad
-                new Thread(() -> waitToDisconnect()).start();
-            }
-        }
+        printRandomAirhorn(event.getMember());
     }
     
     /**
@@ -220,6 +199,9 @@ public class MemeBot extends ListenerAdapter{
                 chan.sendMessage("ERROR: `" + s + "` is not a command!\nTo see a list of commands, type `!MemeBot commands`").queue();
             }
 
+        }
+        else if(harassBen && mem.getUser().getId().equals("113083366961577984")){
+            chan.sendMessage("Did you mean to type `!MemeBot meisennerd`?").queue();
         }
 
     }
@@ -338,6 +320,14 @@ public class MemeBot extends ListenerAdapter{
             case COMMANDS_DESCRIPTIONS: // !MemeBot com+desc
                 printCommandsAndDescriptions(chan);
                 break;
+            case RANDOM_AIRHORN:
+                printRandomAirhorn(user);
+                break;
+            case HARASS_BEN:
+                if(bm){
+                    harassBen = !harassBen;
+                }
+                break;
         }
     }
 
@@ -378,6 +368,12 @@ public class MemeBot extends ListenerAdapter{
 
             commands.put("com+desc",BotCommand.COMMANDS_DESCRIPTIONS);
             commandDescriptions.put(BotCommand.COMMANDS_DESCRIPTIONS, "Prints a list of MemeBot commands and their descriptions");
+
+            commands.put("random",BotCommand.RANDOM_AIRHORN);
+            commandDescriptions.put(BotCommand.RANDOM_AIRHORN, "Prints a random Airhorn Solutions command.");
+
+            commands.put("harass",BotCommand.HARASS_BEN);
+            commandDescriptions.put(BotCommand.HARASS_BEN, "Toggle bot harassment.");
         }
     }
 
@@ -435,6 +431,31 @@ public class MemeBot extends ListenerAdapter{
             temp = temp + "\n" + c;
         }
         mc.sendMessage(temp).queue();
+    }
+
+    private void printRandomAirhorn(Member mem){
+        // ensure that we do not disconnect immediately after beginning a connection
+        dc = false;
+        if(airhornOn){
+            // ensure joinee is not a bot
+            if(!mem.getUser().isBot() && mem.getVoiceState().inVoiceChannel()){
+                VoiceChannel voiceChan = mem.getVoiceState().getChannel();
+                // connect to the voice channel
+                connectTo(voiceChan);
+                // wait a little bit
+                try{
+                    Thread.sleep(1000);
+                }catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+                // send the message to the bot channel
+                Guild g = mem.getGuild();
+                TextChannel chan = g.getTextChannelById("261176936510783488");
+                chan.sendMessage(getRandomAirhorn()).queue();
+                // wait to disconnect in a separate thrad
+                new Thread(() -> waitToDisconnect()).start();
+            }
+        }
     }
 
     /**
@@ -575,7 +596,9 @@ enum BotCommand{
     COMMAND_LIST (false),
     SHUTDOWN (true),
     AIRHORN_COMMANDS (false),
-    COMMANDS_DESCRIPTIONS (false);
+    COMMANDS_DESCRIPTIONS (false),
+    RANDOM_AIRHORN (false),
+    HARASS_BEN (true);
 
     // constructor for saving restricted state
     BotCommand(boolean r){
