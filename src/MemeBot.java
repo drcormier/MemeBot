@@ -124,13 +124,29 @@ public class MemeBot extends ListenerAdapter{
             "!bday weakhorn",
             "!wtc"};
     
+    private static final String[] thinking = {
+    		"hmm...",
+    		"really makes you wonder",
+    		"does 1+1=2?",
+    		"is ben a nerd?",
+    		"what is the meaning of life?",
+    		"can jet fuel melt steel beams?",
+    		"did bush do 9/11?",
+    		"is MemeBot in the illuminati?",
+    		"should I choose symmetra if my team needs a support?",
+    		"let's think about this for a second",
+    		"did pepe deserve to be classified a hate symbol?",
+    		"should I buy an AWP if the rest of my team is on an eco?"
+    };
     // map of commands
     private static HashMap<String,BotCommand> commands;
     // map of command descriptions
     private static HashMap<BotCommand,String> commandDescriptions;
     
-    private static String wheresthatnerd = ":regional_indicator_w: :regional_indicator_h: :regional_indicator_e: :regional_indicator_r: :regional_indicator_e: :regional_indicator_s: :clap: :regional_indicator_t: :regional_indicator_h: :regional_indicator_a: :regional_indicator_t: :clap: :regional_indicator_n: :regional_indicator_e: :regional_indicator_r: :regional_indicator_d: :clap: ";
+    private static final String wheresthatnerd = ":regional_indicator_w: :regional_indicator_h: :regional_indicator_e: :regional_indicator_r: :regional_indicator_e: :regional_indicator_s: :clap: :regional_indicator_t: :regional_indicator_h: :regional_indicator_a: :regional_indicator_t: :clap: :regional_indicator_n: :regional_indicator_e: :regional_indicator_r: :regional_indicator_d: :clap: ";
     
+    private static StringBuffer sb = new StringBuffer();
+
     public static void main(String[] args){
         boolean l = false;
         if(args.length < 1){
@@ -151,6 +167,7 @@ public class MemeBot extends ListenerAdapter{
                     .addListener(new MemeBot(l))
                     .buildBlocking();
             jda.getPresence().setGame(Game.of("with dank memes"));
+            sb.append(Character.toChars(0x1F914));
         }
         catch(Exception e){
             e.printStackTrace();
@@ -195,12 +212,15 @@ public class MemeBot extends ListenerAdapter{
         MessageChannel chan = m.getChannel();
         if(message[0].equals(COMMAND)){
             if(commands.containsKey(message[1])){
-                printLogMessage(mem.getNickname() + " sent the command " + commands.get(message[1]));
+                //printLogMessage(mem.getNickname() + " sent the command " + commands.get(message[1]));
                 parseCommands(commands.get(message[1]),mem,chan,m);
             }else{
                 chan.sendMessage("ERROR: `" + s + "` is not a command!\nTo see a list of commands, type `!MemeBot commands`").queue();
             }
 
+        }
+        else if(s.contains(sb.toString()) && !mem.getUser().getId().equals("262065720345624577")){
+        	chan.sendMessage(getRandomThinking() + " :thinking:").queue();
         }
         else if(harassBen && mem.getUser().getId().equals("107272630842728448")){
             chan.sendMessage("Did you mean to type `!MemeBot meisennerd`?").queue();
@@ -231,8 +251,13 @@ public class MemeBot extends ListenerAdapter{
      * @return the int index to pull the command from
      */
     private String getRandomAirhorn(){
-        int randInt = (int) (airhorns.length*Math.random());
+        int randInt = (int) Math.round((airhorns.length-1)*Math.random());
         return airhornCommands[randInt];
+    }
+    
+    private String getRandomThinking(){
+        int randInt = (int) Math.round((thinking.length-1)*Math.random());
+        return thinking[randInt];
     }
 
     /**
@@ -491,15 +516,13 @@ public class MemeBot extends ListenerAdapter{
      * @param message the message to be logged
      */
     private void printConsoleMessage(LogLevel level, String message){
-        if(log){
-            LocalDateTime date = LocalDateTime.now();
-            DateTimeFormatter form = DateTimeFormatter.ofPattern("HH:mm:ss");
-            String time = date.format(form);
-            String output = "[" + time + "] ";
-            output += "[" + level + "] ";
-            output += message;
-            System.out.println(output);
-        }
+    	LocalDateTime date = LocalDateTime.now();
+        DateTimeFormatter form = DateTimeFormatter.ofPattern("HH:mm:ss");
+        String time = date.format(form);
+        String output = "[" + time + "] ";
+        output += "[" + level + "] ";
+        output += message;
+        System.out.println(output);
     }
 
     /**
