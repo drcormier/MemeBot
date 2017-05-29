@@ -129,6 +129,8 @@ public class MemeBot extends ListenerAdapter{
     // map of command descriptions
     private static HashMap<BotCommand,String> commandDescriptions;
     
+    private static String wheresthatnerd = ":regional_indicator_w: :regional_indicator_h: :regional_indicator_e: :regional_indicator_r: :regional_indicator_e: :regional_indicator_s: :clap: :regional_indicator_t: :regional_indicator_h: :regional_indicator_a: :regional_indicator_t: :clap: :regional_indicator_n: :regional_indicator_e: :regional_indicator_r: :regional_indicator_d: :clap: ";
+    
     public static void main(String[] args){
         boolean l = false;
         if(args.length < 1){
@@ -328,7 +330,28 @@ public class MemeBot extends ListenerAdapter{
                     harassBen = !harassBen;
                 }
                 break;
+            case WTN:
+            	String name = "";
+            	String[] m = mess.getRawContent().split(" ");
+            	for( int i = 2; i < m.length; ++i){
+            		name += m[i] + " ";
+            	}
+            	name = name.toLowerCase().trim();
+            	chan.sendMessage(wtn(name)).queue();
+            	break;
         }
+    }
+    
+    private static String wtn( String name ){
+    	String temp = wheresthatnerd;
+    	for( char c: name.toCharArray() ){
+    		if( c == ' '){
+    			temp += ":clap: ";
+    		}else{
+    			temp += ":regional_indicator_" + c + ": ";
+    		}
+    	}
+    	return temp;
     }
 
     /**
@@ -374,6 +397,9 @@ public class MemeBot extends ListenerAdapter{
 
             commands.put("harass",BotCommand.HARASS_BEN);
             commandDescriptions.put(BotCommand.HARASS_BEN, "Toggle bot harassment.");
+            
+            commands.put("wtn",BotCommand.WTN);
+            commandDescriptions.put(BotCommand.WTN, "Wheres that nerd?");
         }
     }
 
@@ -598,7 +624,8 @@ enum BotCommand{
     AIRHORN_COMMANDS (false),
     COMMANDS_DESCRIPTIONS (false),
     RANDOM_AIRHORN (false),
-    HARASS_BEN (true);
+    HARASS_BEN (true),
+	WTN (false);
 
     // constructor for saving restricted state
     BotCommand(boolean r){
