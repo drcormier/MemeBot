@@ -42,7 +42,6 @@ public class MemeBot extends ListenerAdapter{
     public static Object lock = new Object();
     // if airhorns are enabled
     public static boolean airhornOn = true;
-    public static boolean harassBen = false;
     // the list of airhorn solutions commands
     private static final String[] airhornCommands = {
             "!airhorn default",
@@ -225,9 +224,6 @@ public class MemeBot extends ListenerAdapter{
         else if(s.contains(sb.toString()) && !mem.getUser().getId().equals("262065720345624577")){
         	chan.sendMessage(getRandomThinking() + " :thinking:").queue();
         }
-        else if(harassBen && mem.getUser().getId().equals("107272630842728448")){
-            chan.sendMessage("Did you mean to type `!MemeBot meisennerd`?").queue();
-        }
 
     }
 
@@ -343,11 +339,6 @@ public class MemeBot extends ListenerAdapter{
             case RANDOM_AIRHORN:
                 printRandomAirhorn(user);
                 break;
-            case HARASS_BEN:
-                if(bm){
-                    harassBen = !harassBen;
-                }
-                break;
             case WTN:
             	String name = "";
             	String[] m = mess.getRawContent().split(" ");
@@ -410,9 +401,6 @@ public class MemeBot extends ListenerAdapter{
             commands.put("random",BotCommand.RANDOM_AIRHORN);
             commandDescriptions.put(BotCommand.RANDOM_AIRHORN, "Prints a random Airhorn Solutions command.");
 
-            commands.put("harass",BotCommand.HARASS_BEN);
-            commandDescriptions.put(BotCommand.HARASS_BEN, "Toggle bot harassment.");
-            
             commands.put("wtn",BotCommand.WTN);
             commandDescriptions.put(BotCommand.WTN, "Wheres that nerd?");
         }
