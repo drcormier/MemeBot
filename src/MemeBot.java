@@ -502,7 +502,9 @@ public class MemeBot extends ListenerAdapter{
                 // send the message to the bot channel
                 Guild g = mem.getGuild();
                 TextChannel chan = g.getTextChannelById("261176936510783488");
+                TextChannel tts = g.getTextChannelById("319858339293167616");
                 chan.sendMessage(getRandomAirhorn()).queue();
+                tts.sendMessage(mem.getNickname() + " has joined the channel").queue();
                 // wait to disconnect in a separate thrad
                 new Thread(() -> waitToDisconnect()).start();
             }
