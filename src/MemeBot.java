@@ -7,6 +7,7 @@ import java.util.List;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
+import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.audio.hooks.ConnectionListener;
 import net.dv8tion.jda.core.audio.hooks.ConnectionStatus;
 import net.dv8tion.jda.core.entities.Game;
@@ -501,10 +502,14 @@ public class MemeBot extends ListenerAdapter{
                 }
                 // send the message to the bot channel
                 Guild g = mem.getGuild();
+                // bot channel
                 TextChannel chan = g.getTextChannelById("261176936510783488");
-                TextChannel tts = g.getTextChannelById("319858339293167616");
                 chan.sendMessage(getRandomAirhorn()).queue();
-                tts.sendMessage(mem.getNickname() + " has joined the channel").queue();
+                // tts channel
+                TextChannel tts = g.getTextChannelById("319858339293167616");
+                /* use a messagebuilder so that we can send a tts message */
+                Message ttsm = new MessageBuilder().append(mem.getNickname() + " has joined the channel").setTTS(true).build();
+                tts.sendMessage(ttsm).queue();
                 // wait to disconnect in a separate thrad
                 new Thread(() -> waitToDisconnect()).start();
             }
