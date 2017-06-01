@@ -1,4 +1,4 @@
-import java.io.InputStream;
+package net.epixdude.memebot.core;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -23,6 +23,8 @@ import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.managers.AudioManager;
+import net.epixdude.memebot.util.BotCommand;
+import net.epixdude.memebot.util.LogLevel;
 
 public class MemeBot extends ListenerAdapter{
 
@@ -213,7 +215,7 @@ public class MemeBot extends ListenerAdapter{
         MessageChannel chan = m.getChannel();
         if(message[0].equals(COMMAND)){
             if(commands.containsKey(message[1])){
-                //printLogMessage(mem.getNickname() + " sent the command " + commands.get(message[1]));
+                printLogMessage(mem.getNickname() + " sent the command " + commands.get(message[1]));
                 parseCommands(commands.get(message[1]),mem,chan,m);
             }else{
                 chan.sendMessage("ERROR: `" + s + "` is not a command!\nTo see a list of commands, type `!MemeBot commands`").queue();
@@ -323,16 +325,6 @@ public class MemeBot extends ListenerAdapter{
             case AIRHORN_STATUS: // !MemeBot airhornStatus
                 chan.sendMessage("Airhorning is "+ (airhornOn ? "enabled." : "disabled.")).queue();
                 break;
-            case MEISENNERD: // !MemeBot meisennerd
-                if(user.getUser().getId().equals("107272630842728448")){
-                    try{
-                        InputStream stream = MemeBot.class.getResourceAsStream("meis.png");
-                        chan.sendFile(stream, "meis.png", null);
-                    }catch(Exception e){
-                        e.printStackTrace();
-                    }
-                }
-                break;
             case COMMAND_LIST: // !MemeBot commands
                 printCommands(chan);
                 break;
@@ -402,9 +394,6 @@ public class MemeBot extends ListenerAdapter{
 
             commands.put("airhornStatus",BotCommand.AIRHORN_STATUS);
             commandDescriptions.put(BotCommand.AIRHORN_STATUS, "Check the airhorn functionality status of MemeBot");
-
-            commands.put("meisennerd",BotCommand.MEISENNERD);
-            commandDescriptions.put(BotCommand.MEISENNERD, "Print a picture of Ben");
 
             commands.put("commands",BotCommand.COMMAND_LIST);
             commandDescriptions.put(BotCommand.COMMAND_LIST, "Print a list of MemeBot commands");
@@ -538,7 +527,9 @@ public class MemeBot extends ListenerAdapter{
      * @param message the message to be logged
      */
     private void printLogMessage(String message){
-        printConsoleMessage(LogLevel.LOG,message);
+    	if(log){
+			printConsoleMessage(LogLevel.LOG,message);
+    	}
     }
 }
 
@@ -632,44 +623,4 @@ class MemeListener implements ConnectionListener{
         this.memes = memes;
     }
 
-}
-
-
-/**
- * Enum specifying the type of command being sent by the user.
- * Contains a boolean value restricted, denoting if the command is restricted
- * in use, either to specific people or specific roles. To access this data,
- * call isRestricted() on the enum.
- * @author Daniel Cormier
- * @author Cosmo Viola
- */
-enum BotCommand{
-    // current list of commands
-    AIRHORN_ON (true),
-    AIRHORN_OFF (true),
-    AIRHORN_STATUS (false),
-    MEISENNERD (true),
-    COMMAND_LIST (false),
-    SHUTDOWN (true),
-    AIRHORN_COMMANDS (false),
-    COMMANDS_DESCRIPTIONS (false),
-    RANDOM_AIRHORN (false),
-    HARASS_BEN (true),
-	WTN (false);
-
-    // constructor for saving restricted state
-    BotCommand(boolean r){
-        restricted=r;
-    }
-
-    // store and access restricted state
-    private final boolean restricted;
-    boolean isRestricted(){return restricted;}
-}
-
-enum LogLevel{
-    INFO,
-    LOG,
-    WARNING,
-    ERROR
 }
