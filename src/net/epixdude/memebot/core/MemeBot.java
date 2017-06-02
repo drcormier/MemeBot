@@ -167,7 +167,7 @@ public class MemeBot extends ListenerAdapter{
         try{
             JDA jda = new JDABuilder(AccountType.BOT)
                     .setToken(token)
-                    .addListener(new MemeBot(l))
+                    .addEventListener(new MemeBot(l))
                     .buildBlocking();
             jda.getPresence().setGame(Game.of("with dank memes"));
             sb.append(Character.toChars(0x1F914));
