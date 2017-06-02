@@ -8,8 +8,6 @@ import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.MessageBuilder;
-import net.dv8tion.jda.core.audio.hooks.ConnectionListener;
-import net.dv8tion.jda.core.audio.hooks.ConnectionStatus;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
@@ -17,7 +15,6 @@ import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
@@ -28,7 +25,11 @@ import net.epixdude.memebot.util.LogLevel;
 
 public class MemeBot extends ListenerAdapter{
 
-    private static final String COMMAND = "!MemeBot";
+    private static final String TTS_CHANNEL_NAME = "319858339293167616";
+
+	private static final String BOT_CHANNEL_ID = "261176936510783488";
+
+	private static final String COMMAND = "!MemeBot";
 
     private final boolean log;
     
@@ -145,7 +146,7 @@ public class MemeBot extends ListenerAdapter{
     // map of command descriptions
     private static HashMap<BotCommand,String> commandDescriptions;
     
-    private static final String wheresthatnerd = ":regional_indicator_w: :regional_indicator_h: :regional_indicator_e: :regional_indicator_r: :regional_indicator_e: :regional_indicator_s: :clap: :regional_indicator_t: :regional_indicator_h: :regional_indicator_a: :regional_indicator_t: :clap: :regional_indicator_n: :regional_indicator_e: :regional_indicator_r: :regional_indicator_d: :clap: ";
+    private static final String wheresthatnerd = "wheres that nerd ";
     
     private static StringBuffer sb = new StringBuffer();
 
@@ -221,7 +222,7 @@ public class MemeBot extends ListenerAdapter{
             }
 
         }
-        else if(s.contains(sb.toString()) && !mem.getUser().getId().equals("262065720345624577")){
+        else if(s.contains(sb.toString()) && !mem.getUser().isBot()){
         	chan.sendMessage(getRandomThinking() + " :thinking:").queue();
         }
 
@@ -348,19 +349,36 @@ public class MemeBot extends ListenerAdapter{
             	name = name.toLowerCase().trim();
             	chan.sendMessage(wtn(name)).queue();
             	break;
+            case RICESB:
+            	String usermessage = "";
+            	String[] n = mess.getRawContent().split(" ");
+            	for( int i = 2; i < n.length; ++i){
+            		usermessage += n[i] + " ";
+            	}
+            	usermessage = usermessage.toLowerCase().trim();
+            	chan.sendMessage(ricesb(usermessage)).queue();
+            	break;
         }
     }
     
-    private static String wtn( String name ){
-    	String temp = wheresthatnerd;
-    	for( char c: name.toCharArray() ){
+    private static String regIndEmoji( char ch ){
+    	return ":regional_indicator_" + ch + ": ";
+    }
+    
+    private static String ricesb( String message ){
+    	String temp = "";
+    	for( char c: message.toLowerCase().replaceAll("[^a-z ]", "").toCharArray() ){
     		if( c == ' '){
     			temp += ":clap: ";
     		}else{
-    			temp += ":regional_indicator_" + c + ": ";
+    			temp += regIndEmoji(c);
     		}
     	}
-    	return temp;
+    	return temp;	
+    }
+    
+    private static String wtn( String name ){
+    	return ricesb( wheresthatnerd + name );
     }
 
     /**
@@ -403,6 +421,9 @@ public class MemeBot extends ListenerAdapter{
 
             commands.put("wtn",BotCommand.WTN);
             commandDescriptions.put(BotCommand.WTN, "Wheres that nerd?");
+
+            commands.put("ricesb",BotCommand.RICESB);
+            commandDescriptions.put(BotCommand.RICESB, "Convert string into a sequence of regional indicator and clap emojis");
         }
     }
 
@@ -480,10 +501,10 @@ public class MemeBot extends ListenerAdapter{
                 // send the message to the bot channel
                 Guild g = mem.getGuild();
                 // bot channel
-                TextChannel chan = g.getTextChannelById("261176936510783488");
+                TextChannel chan = g.getTextChannelById(BOT_CHANNEL_ID);
                 chan.sendMessage(getRandomAirhorn()).queue();
                 // tts channel
-                TextChannel tts = g.getTextChannelById("319858339293167616");
+                TextChannel tts = g.getTextChannelById(TTS_CHANNEL_NAME);
                 /* use a messagebuilder so that we can send a tts message */
                 Message ttsm = new MessageBuilder().append(mem.getNickname() + " has joined the channel").setTTS(true).build();
                 tts.sendMessage(ttsm).queue();
@@ -519,96 +540,4 @@ public class MemeBot extends ListenerAdapter{
 			printConsoleMessage(LogLevel.LOG,message);
     	}
     }
-}
-
-/**
- * An implementation of ConnectionListener designed to send
- * the instance of MemeBot a signal to disconnect.
- * To do this, we use OnStatusChange.
- * @author Daniel Cormier
- * @author Cosmo Viola
- */
-class MemeListener implements ConnectionListener{
-
-    Guild guild;
-
-    MemeBot memes;
-
-    public MemeListener(Guild g, MemeBot m){
-        guild=g;
-        memes=m;
-    }
-
-    /**
-     * Execute code on change in ping (presumably).
-     * Note: currently unused
-     * @param arg0 the ping to discord
-     */
-    @Override
-    public void onPing(long arg0) { 
-    }
-
-    /**
-     * Execute code when the ConnectionStatus changes.
-     * This is used to determine when the bot should try to disconnect
-     * from the voice channel. When the bot tries to disconnect from the
-     * voice channel before being connected, the bot becomes stuck in the voice
-     * channel.
-     * @param arg0
-     */
-    @Override
-    public void onStatusChange(ConnectionStatus arg0) {
-        // if we are connected
-        if(arg0.equals(ConnectionStatus.CONNECTED)){
-            // tell the disconnect thread to disconnect
-            synchronized(MemeBot.lock){
-                try{
-                    Thread.sleep(100);
-                }catch (InterruptedException e){
-                    e.printStackTrace();
-                }
-                MemeBot.dc = true;
-                MemeBot.lock.notifyAll();
-            }
-        }
-        
-    }
-
-    /**
-     * Execute code when a user starts speaking.
-     * @param arg0 the user speaking
-     * @param arg1 if the user is speaking or not
-     */
-    @Override
-    public void onUserSpeaking(User arg0, boolean arg1) {
-    }
-
-    /**
-     * @return the guild
-     */
-    public Guild getGuild() {
-        return guild;
-    }
-
-    /**
-     * @param guild the guild to set
-     */
-    public void setGuild(Guild guild) {
-        this.guild = guild;
-    }
-
-    /**
-     * @return the memes
-     */
-    public MemeBot getMemes() {
-        return memes;
-    }
-
-    /**
-     * @param memes the memes to set
-     */
-    public void setMemes(MemeBot memes) {
-        this.memes = memes;
-    }
-
 }
