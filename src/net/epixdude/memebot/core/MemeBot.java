@@ -15,6 +15,7 @@ import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
@@ -150,6 +151,8 @@ public class MemeBot extends ListenerAdapter{
     private static final String wheresthatnerd = "wheres that nerd ";
     
     private static StringBuffer sb = new StringBuffer();
+    
+    private static User mbUser;
 
     public static void main(String[] args){
         boolean l = false;
@@ -172,6 +175,7 @@ public class MemeBot extends ListenerAdapter{
                     .buildBlocking();
             jda.getPresence().setGame(Game.of("with dank memes"));
             sb.append(Character.toChars(0x1F914));
+            mbUser = (User)jda.getSelfUser();
         }
         catch(Exception e){
             e.printStackTrace();
@@ -214,7 +218,7 @@ public class MemeBot extends ListenerAdapter{
         String[] message = s.split(" ");
         Member mem = m.getGuild().getMember(m.getAuthor());
         MessageChannel chan = m.getChannel();
-        if(message[0].equals(COMMAND) || message[0].equals(SHORTCOMMAND)){
+        if(message[0].equals(COMMAND) || message[0].equals(SHORTCOMMAND) || m.isMentioned(mbUser)){
             if(commands.containsKey(message[1])){
                 printLogMessage(mem.getNickname() + " sent the command " + commands.get(message[1]));
                 parseCommands(commands.get(message[1]),mem,chan,m);
