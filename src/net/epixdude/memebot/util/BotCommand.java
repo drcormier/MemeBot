@@ -19,6 +19,7 @@ public enum BotCommand{
     COMMANDS_DESCRIPTIONS (false),
     RANDOM_AIRHORN (false),
     RICESB (false),
+    DEL (true),
 	WTN (false);
 
     // constructor for saving restricted state

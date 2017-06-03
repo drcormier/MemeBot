@@ -30,6 +30,7 @@ public class MemeBot extends ListenerAdapter{
 	private static final String BOT_CHANNEL_ID = "261176936510783488";
 
 	private static final String COMMAND = "!MemeBot";
+	private static final String SHORTCOMMAND = "!mb";
 
     private final boolean log;
     
@@ -213,7 +214,7 @@ public class MemeBot extends ListenerAdapter{
         String[] message = s.split(" ");
         Member mem = m.getGuild().getMember(m.getAuthor());
         MessageChannel chan = m.getChannel();
-        if(message[0].equals(COMMAND)){
+        if(message[0].equals(COMMAND) || message[0].equals(SHORTCOMMAND)){
             if(commands.containsKey(message[1])){
                 printLogMessage(mem.getNickname() + " sent the command " + commands.get(message[1]));
                 parseCommands(commands.get(message[1]),mem,chan,m);
@@ -358,6 +359,15 @@ public class MemeBot extends ListenerAdapter{
             	usermessage = usermessage.toLowerCase().trim();
             	chan.sendMessage(ricesb(usermessage)).queue();
             	break;
+            case DEL:
+            	if(bm){
+            		TextChannel tc = (TextChannel)chan;
+            		int c = Integer.parseInt(mess.getRawContent().split(" ")[2]);
+            		List<Message> messages = tc.getHistory().retrievePast(c).complete();
+            		tc.deleteMessages(messages).queue();
+            		tc.sendMessage("Deleted " + c + " messages").queue();
+            	}
+            	break;
         }
     }
     
@@ -423,7 +433,11 @@ public class MemeBot extends ListenerAdapter{
             commandDescriptions.put(BotCommand.WTN, "Wheres that nerd?");
 
             commands.put("ricesb",BotCommand.RICESB);
-            commandDescriptions.put(BotCommand.RICESB, "Convert string into a sequence of regional indicator and clap emojis");
+            commandDescriptions.put(BotCommand.RICESB, "Convert string into a sequence of regional indicator and clap emojis.");
+
+            commands.put("del",BotCommand.DEL);
+            commandDescriptions.put(BotCommand.DEL, "Delete the n most recent messages from the channel.");
+
         }
     }
 
