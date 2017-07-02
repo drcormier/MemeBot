@@ -1,13 +1,16 @@
 package net.epixdude.memebot.core;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.MessageBuilder;
+import net.dv8tion.jda.core.entities.Emote;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
@@ -21,6 +24,8 @@ import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.managers.AudioManager;
+import net.epixdude.memebot.ethereum.Ethereum;
+import net.epixdude.memebot.ethereum.EthereumData;
 import net.epixdude.memebot.util.BotCommand;
 import net.epixdude.memebot.util.LogLevel;
 
@@ -153,6 +158,8 @@ public class MemeBot extends ListenerAdapter{
     private static StringBuffer sb = new StringBuffer();
     
     private static User mbUser;
+    
+    private static Message owt = null;
 
     public static void main(String[] args){
         boolean l = false;
@@ -332,7 +339,7 @@ public class MemeBot extends ListenerAdapter{
                 break;
             case SHUTDOWN: // !MemeBot shutdown
                 if(bm){
-                    chan.sendMessage("Shutting down.").queue();
+                    chan.sendMessage("Shutting down.").complete();
                     chan.getJDA().shutdown();
                 }
                 break;
@@ -372,6 +379,28 @@ public class MemeBot extends ListenerAdapter{
             		tc.sendMessage("Deleted " + c + " messages").queue();
             	}
             	break;
+            case TEST:
+            	if(bm){
+            		chan.sendMessage(tilt(chan)).queue();
+            	}
+            	break;
+            case ETHER:
+            	try{
+            		NumberFormat format = NumberFormat.getCurrencyInstance(Locale.US);
+            		EthereumData data = Ethereum.getEthereumData();
+            		double daychange = ((data.getPrice()/data.getOpen())-1.0)*100.0;
+            		String edata = "Ethereum Stats:";
+            		edata += "\nprice: `" + format.format(data.getPrice());
+            		edata += String.format(" (%+.2f%%)", daychange );
+            		edata += "`\nopen: `" + format.format(data.getOpen());
+            		edata += "`\nhigh: `" + format.format(data.getHigh());
+            		edata += "`\nlow: `" + format.format(data.getLow());
+            		edata += String.format("`\nvolume: `%,.2f ETH (approx. $%,.2f)`", data.getVolume(), data.getVolume()*data.getPrice() );
+            		chan.sendMessage(edata).queue();
+            	}catch(Exception e){
+            		e.printStackTrace();
+            	}
+            	break;
         }
     }
     
@@ -393,6 +422,20 @@ public class MemeBot extends ListenerAdapter{
     
     private static String wtn( String name ){
     	return ricesb( wheresthatnerd + name );
+    }
+    
+    private static Message tilt(MessageChannel chan){
+    	if( owt == null ){
+			Emote fgm = chan.getJDA().getEmotesByName("FeelsGoodMan", true).get(0);
+			MessageBuilder fgmb = new MessageBuilder();
+			fgmb.append(fgm);
+			for( String word : "IM READY TO TILT".split(" ")){
+				fgmb.append(word);
+				fgmb.append(fgm);
+			}
+			owt = fgmb.build();
+    	}
+    	return owt;
     }
 
     /**
@@ -441,6 +484,12 @@ public class MemeBot extends ListenerAdapter{
 
             commands.put("del",BotCommand.DEL);
             commandDescriptions.put(BotCommand.DEL, "Delete the n most recent messages from the channel.");
+
+            commands.put("test",BotCommand.TEST);
+            commandDescriptions.put(BotCommand.TEST, "A test command.");
+            
+            commands.put("ether",BotCommand.ETHER);
+            commandDescriptions.put(BotCommand.ETHER, "Gets the current ethereum price from GDAX.");
 
         }
     }

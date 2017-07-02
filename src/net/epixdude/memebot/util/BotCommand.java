@@ -20,7 +20,9 @@ public enum BotCommand{
     RANDOM_AIRHORN (false),
     RICESB (false),
     DEL (true),
-	WTN (false);
+    TEST (true),
+	WTN (false),
+	ETHER (false);
 
     // constructor for saving restricted state
     BotCommand(boolean r){
