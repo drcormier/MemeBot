@@ -207,7 +207,7 @@ public class MemeBot extends ListenerAdapter{
      */
     @Override
     public void onGuildVoiceJoin(GuildVoiceJoinEvent event){
-        printRandomAirhorn(event.getMember());
+        printRandomAirhorn(event.getMember(), true);
     }
     
     /**
@@ -290,7 +290,14 @@ public class MemeBot extends ListenerAdapter{
                 }
             }
             // disconnect
-            manager.closeAudioConnection();
+            new Thread(()->{
+            	try{
+            		Thread.sleep(500);
+            	}catch(Exception e){
+            		e.printStackTrace();
+            	}
+				manager.closeAudioConnection();
+            }).start();
 
         }
     }
@@ -350,7 +357,7 @@ public class MemeBot extends ListenerAdapter{
                 printCommandsAndDescriptions(chan);
                 break;
             case RANDOM_AIRHORN:
-                printRandomAirhorn(user);
+                printRandomAirhorn(user, false);
                 break;
             case WTN:
             	String name = "";
@@ -401,6 +408,11 @@ public class MemeBot extends ListenerAdapter{
             		e.printStackTrace();
             	}
             	break;
+            case ILLUMINATI:
+            	playIlluminati(user);
+            	break;
+
+            	
         }
     }
     
@@ -490,6 +502,9 @@ public class MemeBot extends ListenerAdapter{
             
             commands.put("ether",BotCommand.ETHER);
             commandDescriptions.put(BotCommand.ETHER, "Gets the current ethereum price from GDAX.");
+            
+            commands.put("illuminati",BotCommand.ILLUMINATI);
+            commandDescriptions.put(BotCommand.ILLUMINATI, "Illuminati confirmed?");
 
         }
     }
@@ -550,33 +565,73 @@ public class MemeBot extends ListenerAdapter{
         mc.sendMessage(temp).queue();
     }
 
-    private void printRandomAirhorn(Member mem){
+    private void printRandomAirhorn(Member mem, boolean join){
         // ensure that we do not disconnect immediately after beginning a connection
         dc = false;
         if(airhornOn){
             // ensure joinee is not a bot
             if(!mem.getUser().isBot() && mem.getVoiceState().inVoiceChannel()){
-                VoiceChannel voiceChan = mem.getVoiceState().getChannel();
-                // connect to the voice channel
-                connectTo(voiceChan);
-                // wait a little bit
-                try{
-                    Thread.sleep(1000);
-                }catch (InterruptedException e){
-                    e.printStackTrace();
-                }
-                // send the message to the bot channel
-                Guild g = mem.getGuild();
-                // bot channel
-                TextChannel chan = g.getTextChannelById(BOT_CHANNEL_ID);
-                chan.sendMessage(getRandomAirhorn()).queue();
-                // tts channel
-                TextChannel tts = g.getTextChannelById(TTS_CHANNEL_NAME);
-                /* use a messagebuilder so that we can send a tts message */
-                Message ttsm = new MessageBuilder().append(mem.getNickname() + " has joined the channel").setTTS(true).build();
-                tts.sendMessage(ttsm).queue();
+            	new Thread(()->{
+            		VoiceChannel voiceChan = mem.getVoiceState().getChannel();
+            		// connect to the voice channel
+					connectTo(voiceChan);
+					// wait a little bit
+					try{
+						Thread.sleep(1000);
+					}catch (InterruptedException e){
+						e.printStackTrace();
+					}
+					// send the message to the bot channel
+					Guild g = mem.getGuild();
+					// bot channel
+					TextChannel chan = g.getTextChannelById(BOT_CHANNEL_ID);
+					chan.sendMessage(getRandomAirhorn()).queue();
+					if(join){
+						// tts channel
+						TextChannel tts = g.getTextChannelById(TTS_CHANNEL_NAME);
+						/* use a messagebuilder so that we can send a tts message */
+						Message ttsm = new MessageBuilder().append(mem.getNickname() + " has joined the channel").setTTS(true).build();
+						tts.sendMessage(ttsm).queue();
+					}
+            	}).start();
                 // wait to disconnect in a separate thrad
                 new Thread(() -> waitToDisconnect()).start();
+            }
+        }
+    }
+
+    private void playIlluminati(Member mem){
+        // ensure that we do not disconnect immediately after beginning a connection
+        dc = false;
+        if(airhornOn){
+            // ensure joinee is not a bot
+            if(!mem.getUser().isBot() && mem.getVoiceState().inVoiceChannel()){
+            	new Thread(()->{
+            		VoiceChannel voiceChan = mem.getVoiceState().getChannel();
+            		// connect to the voice channel
+					connectTo(voiceChan);
+					// wait a little bit
+					try{
+						Thread.sleep(1000);
+					}catch (InterruptedException e){
+						e.printStackTrace();
+					}
+					// send the message to the bot channel
+					Guild g = mem.getGuild();
+					// bot channel
+					TextChannel chan = g.getTextChannelById(BOT_CHANNEL_ID);
+					chan.sendMessage(";;play https://www.youtube.com/watch?v=GRWbIoIR04c").queue();
+					// tts channel
+					TextChannel tts = g.getTextChannelById(TTS_CHANNEL_NAME);
+					try{
+						Thread.sleep(18000);
+					}catch(Exception e){
+						e.printStackTrace();
+					}
+					chan.sendMessage(";;stop").queue();
+            	}).start();
+				// wait to disconnect in a separate thrad
+				new Thread(() -> waitToDisconnect()).start();
             }
         }
     }

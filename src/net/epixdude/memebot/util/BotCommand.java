@@ -22,7 +22,8 @@ public enum BotCommand{
     DEL (true),
     TEST (true),
 	WTN (false),
-	ETHER (false);
+	ETHER (false),
+	ILLUMINATI(false);
 
     // constructor for saving restricted state
     BotCommand(boolean r){
