@@ -25,7 +25,7 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.managers.AudioManager;
 import net.epixdude.memebot.ethereum.Ethereum;
-import net.epixdude.memebot.ethereum.EthereumData;
+import net.epixdude.memebot.ethereum.CryptoData;
 import net.epixdude.memebot.util.BotCommand;
 import net.epixdude.memebot.util.LogLevel;
 
@@ -394,7 +394,7 @@ public class MemeBot extends ListenerAdapter{
             case ETHER:
             	try{
             		NumberFormat format = NumberFormat.getCurrencyInstance(Locale.US);
-            		EthereumData data = Ethereum.getEthereumData();
+            		CryptoData data = Ethereum.getEthereumData();
             		double daychange = ((data.getPrice()/data.getOpen())-1.0)*100.0;
             		String edata = "Ethereum Stats:";
             		edata += "\nprice: `" + format.format(data.getPrice());

@@ -1,6 +1,6 @@
 package net.epixdude.memebot.ethereum;
 
-public class EthereumData {
+public class CryptoData {
 
 	private double price,open,low,high,volume;
 	
@@ -44,7 +44,7 @@ public class EthereumData {
 		this.volume = volume;
 	}
 
-	public EthereumData(double price, double open, double low, double high, double volume) {
+	public CryptoData(double price, double open, double low, double high, double volume) {
 		super();
 		this.price = price;
 		this.open = open;
@@ -53,7 +53,7 @@ public class EthereumData {
 		this.volume = volume;
 	}
 	
-	public EthereumData(){
+	public CryptoData(){
 		this(0.0,0.0,0.0,0.0,0.0);
 	}
 

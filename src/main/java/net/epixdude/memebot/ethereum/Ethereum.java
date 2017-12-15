@@ -12,8 +12,8 @@ public class Ethereum {
 	private static final String ETHEREUM_STATS = "https://api.gdax.com/products/ETH-USD/stats";
 	private static final String USER_AGENT = "Mozilla/5.0";
 	
-	public static EthereumData getEthereumData() throws Exception{
-		EthereumData data = new EthereumData();
+	public static CryptoData getEthereumData() throws Exception{
+		CryptoData data = new CryptoData();
 		URL tickerURL = new URL(ETHEREUM_TICKER);
 		HttpURLConnection tickerCon = (HttpURLConnection) tickerURL.openConnection();
 		tickerCon.setRequestMethod("GET");
