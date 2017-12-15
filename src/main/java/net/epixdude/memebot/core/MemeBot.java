@@ -180,7 +180,7 @@ public class MemeBot extends ListenerAdapter{
                     .setToken(token)
                     .addEventListener(new MemeBot(l))
                     .buildBlocking();
-            jda.getPresence().setGame(Game.of("with dank memes"));
+            jda.getPresence().setGame(Game.playing("with dank memes"));
             sb.append(Character.toChars(0x1F914));
             mbUser = (User)jda.getSelfUser();
         }
@@ -221,7 +221,7 @@ public class MemeBot extends ListenerAdapter{
     @Override
     public void onGuildMessageReceived(GuildMessageReceivedEvent event){
         Message m = event.getMessage();
-        String s = m.getContent();
+        String s = m.getContentDisplay();
         String[] message = s.split(" ");
         Member mem = m.getGuild().getMember(m.getAuthor());
         MessageChannel chan = m.getChannel();
@@ -361,7 +361,7 @@ public class MemeBot extends ListenerAdapter{
                 break;
             case WTN:
             	String name = "";
-            	String[] m = mess.getRawContent().split(" ");
+            	String[] m = mess.getContentRaw().split(" ");
             	for( int i = 2; i < m.length; ++i){
             		name += m[i] + " ";
             	}
@@ -370,7 +370,7 @@ public class MemeBot extends ListenerAdapter{
             	break;
             case RICESB:
             	String usermessage = "";
-            	String[] n = mess.getRawContent().split(" ");
+            	String[] n = mess.getContentRaw().split(" ");
             	for( int i = 2; i < n.length; ++i){
             		usermessage += n[i] + " ";
             	}
@@ -380,7 +380,7 @@ public class MemeBot extends ListenerAdapter{
             case DEL:
             	if(bm){
             		TextChannel tc = (TextChannel)chan;
-            		int c = Integer.parseInt(mess.getRawContent().split(" ")[2]);
+            		int c = Integer.parseInt(mess.getContentRaw().split(" ")[2]);
             		List<Message> messages = tc.getHistory().retrievePast(c).complete();
             		tc.deleteMessages(messages).queue();
             		tc.sendMessage("Deleted " + c + " messages").queue();
@@ -437,16 +437,14 @@ public class MemeBot extends ListenerAdapter{
     }
     
     private static Message tilt(MessageChannel chan){
-    	if( owt == null ){
-			Emote fgm = chan.getJDA().getEmotesByName("FeelsGoodMan", true).get(0);
-			MessageBuilder fgmb = new MessageBuilder();
-			fgmb.append(fgm);
-			for( String word : "IM READY TO TILT".split(" ")){
-				fgmb.append(word);
-				fgmb.append(fgm);
-			}
-			owt = fgmb.build();
-    	}
+	Emote fgm = chan.getJDA().getEmotesByName("FeelsGoodMan", true).get(0);
+	MessageBuilder fgmb = new MessageBuilder();
+	fgmb.append(fgm);
+	for( String word : "IM READY TO TILT".split(" ")){
+		fgmb.append(word);
+		fgmb.append(fgm);
+	}
+	owt = fgmb.build();
     	return owt;
     }
 
@@ -459,54 +457,52 @@ public class MemeBot extends ListenerAdapter{
      * the command, for usage in the com+desc command.
      */
     private static void addCommands(){
-        if(commands == null && commandDescriptions == null){
-            // initialize the hashmaps
-            commands = new HashMap<>();
-            commandDescriptions = new HashMap<>();
-            // add the commands
-            commands.put("airhornOn",BotCommand.AIRHORN_ON);
-            commandDescriptions.put(BotCommand.AIRHORN_ON, "Enable the airhorn functionality of MemeBot");
+		// initialize the hashmaps
+		commands = new HashMap<>();
+		commandDescriptions = new HashMap<>();
+		// add the commands
+		commands.put("airhornOn",BotCommand.AIRHORN_ON);
+		commandDescriptions.put(BotCommand.AIRHORN_ON, "Enable the airhorn functionality of MemeBot");
 
-            commands.put("airhornOff",BotCommand.AIRHORN_OFF);
-            commandDescriptions.put(BotCommand.AIRHORN_OFF, "Disable the airhorn functionality of MemeBot");
+		commands.put("airhornOff",BotCommand.AIRHORN_OFF);
+		commandDescriptions.put(BotCommand.AIRHORN_OFF, "Disable the airhorn functionality of MemeBot");
 
-            commands.put("airhornStatus",BotCommand.AIRHORN_STATUS);
-            commandDescriptions.put(BotCommand.AIRHORN_STATUS, "Check the airhorn functionality status of MemeBot");
+		commands.put("airhornStatus",BotCommand.AIRHORN_STATUS);
+		commandDescriptions.put(BotCommand.AIRHORN_STATUS, "Check the airhorn functionality status of MemeBot");
 
-            commands.put("commands",BotCommand.COMMAND_LIST);
-            commandDescriptions.put(BotCommand.COMMAND_LIST, "Print a list of MemeBot commands");
+		commands.put("commands",BotCommand.COMMAND_LIST);
+		commandDescriptions.put(BotCommand.COMMAND_LIST, "Print a list of MemeBot commands");
 
-            commands.put("shutdown",BotCommand.SHUTDOWN);
-            commandDescriptions.put(BotCommand.SHUTDOWN, "Shut down MemeBot");
+		commands.put("shutdown",BotCommand.SHUTDOWN);
+		commandDescriptions.put(BotCommand.SHUTDOWN, "Shut down MemeBot");
 
-            commands.put("airhornCommands",BotCommand.AIRHORN_COMMANDS);
-            commandDescriptions.put(BotCommand.AIRHORN_COMMANDS, "Print a list of Airhorn Solutions commands");
+		commands.put("airhornCommands",BotCommand.AIRHORN_COMMANDS);
+		commandDescriptions.put(BotCommand.AIRHORN_COMMANDS, "Print a list of Airhorn Solutions commands");
 
-            commands.put("com+desc",BotCommand.COMMANDS_DESCRIPTIONS);
-            commandDescriptions.put(BotCommand.COMMANDS_DESCRIPTIONS, "Prints a list of MemeBot commands and their descriptions");
+		commands.put("com+desc",BotCommand.COMMANDS_DESCRIPTIONS);
+		commandDescriptions.put(BotCommand.COMMANDS_DESCRIPTIONS, "Prints a list of MemeBot commands and their descriptions");
 
-            commands.put("random",BotCommand.RANDOM_AIRHORN);
-            commandDescriptions.put(BotCommand.RANDOM_AIRHORN, "Prints a random Airhorn Solutions command.");
+		commands.put("random",BotCommand.RANDOM_AIRHORN);
+		commandDescriptions.put(BotCommand.RANDOM_AIRHORN, "Prints a random Airhorn Solutions command.");
 
-            commands.put("wtn",BotCommand.WTN);
-            commandDescriptions.put(BotCommand.WTN, "Wheres that nerd?");
+		commands.put("wtn",BotCommand.WTN);
+		commandDescriptions.put(BotCommand.WTN, "Wheres that nerd?");
 
-            commands.put("ricesb",BotCommand.RICESB);
-            commandDescriptions.put(BotCommand.RICESB, "Convert string into a sequence of regional indicator and clap emojis.");
+		commands.put("ricesb",BotCommand.RICESB);
+		commandDescriptions.put(BotCommand.RICESB, "Convert string into a sequence of regional indicator and clap emojis.");
 
-            commands.put("del",BotCommand.DEL);
-            commandDescriptions.put(BotCommand.DEL, "Delete the n most recent messages from the channel.");
+		commands.put("del",BotCommand.DEL);
+		commandDescriptions.put(BotCommand.DEL, "Delete the n most recent messages from the channel.");
 
-            commands.put("test",BotCommand.TEST);
-            commandDescriptions.put(BotCommand.TEST, "A test command.");
-            
-            commands.put("ether",BotCommand.ETHER);
-            commandDescriptions.put(BotCommand.ETHER, "Gets the current ethereum price from GDAX.");
-            
-            commands.put("illuminati",BotCommand.ILLUMINATI);
-            commandDescriptions.put(BotCommand.ILLUMINATI, "Illuminati confirmed?");
+		commands.put("test",BotCommand.TEST);
+		commandDescriptions.put(BotCommand.TEST, "A test command.");
+		
+		commands.put("ether",BotCommand.ETHER);
+		commandDescriptions.put(BotCommand.ETHER, "Gets the current ethereum price from GDAX.");
+		
+		commands.put("illuminati",BotCommand.ILLUMINATI);
+		commandDescriptions.put(BotCommand.ILLUMINATI, "Illuminati confirmed?");
 
-        }
     }
 
     /**
