@@ -34,7 +34,7 @@
           <configuration>
             <archive>
               <manifest>
-                <mainClass>fully.qualified.MainClass</mainClass>
+                <mainClass>net.epixdude.memebot.core.MemeBot</mainClass>
               </manifest>
             </archive>
             <descriptorRefs>
