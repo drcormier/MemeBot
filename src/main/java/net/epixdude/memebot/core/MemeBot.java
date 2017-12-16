@@ -24,8 +24,10 @@ import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.managers.AudioManager;
-import net.epixdude.memebot.ethereum.Ethereum;
-import net.epixdude.memebot.ethereum.CryptoData;
+import net.epixdude.memebot.crypto.Bitcoin;
+import net.epixdude.memebot.crypto.CryptoData;
+import net.epixdude.memebot.crypto.Ethereum;
+import net.epixdude.memebot.crypto.Litecoin;
 import net.epixdude.memebot.util.BotCommand;
 import net.epixdude.memebot.util.LogLevel;
 
@@ -360,57 +362,67 @@ public class MemeBot extends ListenerAdapter{
                 printRandomAirhorn(user, false);
                 break;
             case WTN:
-            	String name = "";
-            	String[] m = mess.getContentRaw().split(" ");
-            	for( int i = 2; i < m.length; ++i){
-            		name += m[i] + " ";
-            	}
-            	name = name.toLowerCase().trim();
-            	chan.sendMessage(wtn(name)).queue();
-            	break;
+                	String name = "";
+                	String[] m = mess.getContentRaw().split(" ");
+                	for( int i = 2; i < m.length; ++i){
+                		name += m[i] + " ";
+                	}
+                	name = name.toLowerCase().trim();
+                	chan.sendMessage(wtn(name)).queue();
+                	break;
             case RICESB:
-            	String usermessage = "";
-            	String[] n = mess.getContentRaw().split(" ");
-            	for( int i = 2; i < n.length; ++i){
-            		usermessage += n[i] + " ";
-            	}
-            	usermessage = usermessage.toLowerCase().trim();
-            	chan.sendMessage(ricesb(usermessage)).queue();
-            	break;
+                	String usermessage = "";
+                	String[] n = mess.getContentRaw().split(" ");
+                	for( int i = 2; i < n.length; ++i){
+                		usermessage += n[i] + " ";
+                	}
+                	usermessage = usermessage.toLowerCase().trim();
+                	chan.sendMessage(ricesb(usermessage)).queue();
+                	break;
             case DEL:
-            	if(bm){
-            		TextChannel tc = (TextChannel)chan;
-            		int c = Integer.parseInt(mess.getContentRaw().split(" ")[2]);
-            		List<Message> messages = tc.getHistory().retrievePast(c).complete();
-            		tc.deleteMessages(messages).queue();
-            		tc.sendMessage("Deleted " + c + " messages").queue();
-            	}
-            	break;
+                	if(bm){
+                		TextChannel tc = (TextChannel)chan;
+                		int c = Integer.parseInt(mess.getContentRaw().split(" ")[2]);
+                		List<Message> messages = tc.getHistory().retrievePast(c).complete();
+                		tc.deleteMessages(messages).queue();
+                		tc.sendMessage("Deleted " + c + " messages").queue();
+                	}
+                	break;
             case TEST:
-            	if(bm){
-            		chan.sendMessage(tilt(chan)).queue();
-            	}
-            	break;
+                	if(bm){
+                		chan.sendMessage(tilt(chan)).queue();
+                	}
+                	break;
             case ETHER:
-            	try{
-            		NumberFormat format = NumberFormat.getCurrencyInstance(Locale.US);
-            		CryptoData data = Ethereum.getEthereumData();
-            		double daychange = ((data.getPrice()/data.getOpen())-1.0)*100.0;
-            		String edata = "Ethereum Stats:";
-            		edata += "\nprice: `" + format.format(data.getPrice());
-            		edata += String.format(" (%+.2f%%)", daychange );
-            		edata += "`\nopen: `" + format.format(data.getOpen());
-            		edata += "`\nhigh: `" + format.format(data.getHigh());
-            		edata += "`\nlow: `" + format.format(data.getLow());
-            		edata += String.format("`\nvolume: `%,.2f ETH (approx. $%,.2f)`", data.getVolume(), data.getVolume()*data.getPrice() );
-            		chan.sendMessage(edata).queue();
-            	}catch(Exception e){
-            		e.printStackTrace();
-            	}
-            	break;
+                	try{
+                		Ethereum eth = new Ethereum();
+                		CryptoData data = eth.getData();
+                		chan.sendMessage(data.toString()).queue();
+                	}catch(Exception e){
+                		e.printStackTrace();
+                	}
+                	break;
+            case BITCOIN:
+                	try{
+                		Bitcoin btc = new Bitcoin();
+                		CryptoData data = btc.getData();
+                		chan.sendMessage(data.toString()).queue();
+                	}catch(Exception e){
+                		e.printStackTrace();
+                	}
+                	break;
+            case LITECOIN:
+                	try{
+                		Litecoin ltc = new Litecoin();
+                		CryptoData data = ltc.getData();
+                		chan.sendMessage(data.toString()).queue();
+                	}catch(Exception e){
+                		e.printStackTrace();
+                	}
+                	break;
             case ILLUMINATI:
-            	playIlluminati(user);
-            	break;
+                	playIlluminati(user);
+                	break;
 
             	
         }
@@ -502,6 +514,12 @@ public class MemeBot extends ListenerAdapter{
 		
 		commands.put("illuminati",BotCommand.ILLUMINATI);
 		commandDescriptions.put(BotCommand.ILLUMINATI, "Illuminati confirmed?");
+
+		commands.put("bitcoin",BotCommand.BITCOIN);
+		commandDescriptions.put(BotCommand.BITCOIN, "Gets the current bitcoin price from GDAX.");
+
+		commands.put("litecoin",BotCommand.LITECOIN);
+		commandDescriptions.put(BotCommand.LITECOIN, "Gets the current litecoin price from GDAX.");
 
     }
 

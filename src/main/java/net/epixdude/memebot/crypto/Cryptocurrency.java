@@ -1,23 +1,34 @@
-package net.epixdude.memebot.ethereum;
+package net.epixdude.memebot.crypto;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
-import org.json.*;
 
-public class Ethereum {
+import org.json.JSONObject;
 
-	private static final String ETHEREUM_TICKER = "https://api.gdax.com/products/ETH-USD/ticker";
-	private static final String ETHEREUM_STATS = "https://api.gdax.com/products/ETH-USD/stats";
+public abstract class Cryptocurrency {
+
 	private static final String USER_AGENT = "Mozilla/5.0";
+	protected String TICKER_URL_STRING;
+	protected String STATS_URL_STRING;
+	protected String FULL_NAME;
+	protected String ABBREVIATION;
 	
-	public static CryptoData getEthereumData() throws Exception{
+
+	public CryptoData getData() throws ProtocolException, IOException, MalformedURLException{
+		// get JSON from eth ticker
 		CryptoData data = new CryptoData();
-		URL tickerURL = new URL(ETHEREUM_TICKER);
+		data.setCurrencyfullname(FULL_NAME);
+		data.setCurrencyabbreviation(ABBREVIATION);
+		URL tickerURL = new URL(TICKER_URL_STRING);
 		HttpURLConnection tickerCon = (HttpURLConnection) tickerURL.openConnection();
 		tickerCon.setRequestMethod("GET");
 		tickerCon.setRequestProperty("User-Agent", USER_AGENT);
+		// save ticker to string
 		BufferedReader in = new BufferedReader(
 		        new InputStreamReader(tickerCon.getInputStream()));
 		String inputLine;
@@ -27,10 +38,13 @@ public class Ethereum {
 			response.append(inputLine);
 		}
 		in.close();
+		// parse JSON
 		JSONObject j = new JSONObject(response.toString());
+		// grab current price
 		data.setPrice(j.getDouble("price"));
-
-		URL statsURL = new URL(ETHEREUM_STATS);
+		
+		// grab current stats
+		URL statsURL = new URL(STATS_URL_STRING);
 		HttpURLConnection statsCon = (HttpURLConnection) statsURL.openConnection();
 		statsCon.setRequestMethod("GET");
 		statsCon.setRequestProperty("User-Agent", USER_AGENT);

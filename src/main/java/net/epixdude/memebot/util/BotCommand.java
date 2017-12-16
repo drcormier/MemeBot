@@ -23,7 +23,9 @@ public enum BotCommand{
     TEST (true),
 	WTN (false),
 	ETHER (false),
-	ILLUMINATI(false);
+	ILLUMINATI(false),
+	BITCOIN(false),
+	LITECOIN(false);
 
     // constructor for saving restricted state
     BotCommand(boolean r){
