@@ -1,10 +1,8 @@
 package net.epixdude.memebot.core;
-import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
@@ -635,8 +633,6 @@ public class MemeBot extends ListenerAdapter{
 					// bot channel
 					TextChannel chan = g.getTextChannelById(BOT_CHANNEL_ID);
 					chan.sendMessage(";;play https://www.youtube.com/watch?v=GRWbIoIR04c").queue();
-					// tts channel
-					TextChannel tts = g.getTextChannelById(TTS_CHANNEL_NAME);
 					try{
 						Thread.sleep(18000);
 					}catch(Exception e){

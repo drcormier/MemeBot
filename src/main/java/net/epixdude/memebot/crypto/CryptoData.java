@@ -5,92 +5,94 @@ import java.util.Locale;
 
 public class CryptoData {
 
-	private double price,open,low,high,volume;
-	private String currencyfullname, currencyabbreviation;
-	
-	public String getCurrencyfullname() {
-		return currencyfullname;
-	}
+    private double price, open, low, high, volume;
+    private String currencyfullname, currencyabbreviation;
 
-	public void setCurrencyfullname(String currencyfullname) {
-		this.currencyfullname = currencyfullname;
-	}
+    public CryptoData() {
+        this( 0.0, 0.0, 0.0, 0.0, 0.0, "", "" );
+    }
 
-	public String getCurrencyabbreviation() {
-		return currencyabbreviation;
-	}
+    public CryptoData(double price, double open, double low, double high, double volume, String currencyfullname,
+            String currencyabbreviation) {
+        super();
+        this.price = price;
+        this.open = open;
+        this.low = low;
+        this.high = high;
+        this.volume = volume;
+        this.currencyfullname = currencyfullname;
+        this.currencyabbreviation = currencyabbreviation;
+    }
 
-	public void setCurrencyabbreviation(String currencyabbreviation) {
-		this.currencyabbreviation = currencyabbreviation;
-	}
+    public String getCurrencyabbreviation() {
+        return currencyabbreviation;
+    }
 
-	public double getPrice() {
-		return price;
-	}
+    public String getCurrencyfullname() {
+        return currencyfullname;
+    }
 
-	public void setPrice(double price) {
-		this.price = price;
-	}
+    public double getHigh() {
+        return high;
+    }
 
-	public double getOpen() {
-		return open;
-	}
+    public double getLow() {
+        return low;
+    }
 
-	public void setOpen(double open) {
-		this.open = open;
-	}
+    public double getOpen() {
+        return open;
+    }
 
-	public double getLow() {
-		return low;
-	}
+    public double getPrice() {
+        return price;
+    }
 
-	public void setLow(double low) {
-		this.low = low;
-	}
+    public double getVolume() {
+        return volume;
+    }
 
-	public double getHigh() {
-		return high;
-	}
+    public void setCurrencyabbreviation(String currencyabbreviation) {
+        this.currencyabbreviation = currencyabbreviation;
+    }
 
-	public void setHigh(double high) {
-		this.high = high;
-	}
+    public void setCurrencyfullname(String currencyfullname) {
+        this.currencyfullname = currencyfullname;
+    }
 
-	public double getVolume() {
-		return volume;
-	}
+    public void setHigh(double high) {
+        this.high = high;
+    }
 
-	public void setVolume(double volume) {
-		this.volume = volume;
-	}
+    public void setLow(double low) {
+        this.low = low;
+    }
 
-	public CryptoData(double price, double open, double low, double high, double volume, String currencyfullname, String currencyabbreviation) {
-		super();
-		this.price = price;
-		this.open = open;
-		this.low = low;
-		this.high = high;
-		this.volume = volume;
-		this.currencyfullname = currencyfullname;
-		this.currencyabbreviation = currencyabbreviation;
-	}
-	
-	public CryptoData(){
-		this(0.0,0.0,0.0,0.0,0.0, "", "");
-	}
-	
-	public String toString() {
-            		NumberFormat format = NumberFormat.getCurrencyInstance(Locale.US);
-		double daychange = ((this.getPrice()/this.getOpen())-1.0)*100.0;
-		String data = this.currencyfullname + " Stats:";
-		data += "\nprice: `" + format.format(this.getPrice());
-		data += String.format(" (%+.2f%%)", daychange );
-		data += "`\nopen: `" + format.format(this.getOpen());
-		data += "`\nhigh: `" + format.format(this.getHigh());
-		data += "`\nlow: `" + format.format(this.getLow());
-		data += String.format("`\nvolume: `%,.2f " + this.currencyabbreviation + 
-				"(approx. $%,.2f)`", this.getVolume(), this.getVolume()*this.getPrice() );
-		return data;
-	}
+    public void setOpen(double open) {
+        this.open = open;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public void setVolume(double volume) {
+        this.volume = volume;
+    }
+
+    @Override
+    public String toString() {
+        final NumberFormat format = NumberFormat.getCurrencyInstance( Locale.US );
+        final double daychange = (getPrice() / getOpen() - 1.0) * 100.0;
+        String data = currencyfullname + " Stats:";
+        data += "\nprice: `" + format.format( getPrice() );
+        data += String.format( " (%+.2f%%)", daychange );
+        data += "`\nopen: `" + format.format( getOpen() );
+        data += "`\nhigh: `" + format.format( getHigh() );
+        data += "`\nlow: `" + format.format( getLow() );
+        data += String.format( "`\nvolume: `%,.2f " + currencyabbreviation + "(approx. $%,.2f)`", getVolume(),
+                getVolume() * getPrice() );
+        return data;
+    }
 
 }

@@ -1,8 +1,5 @@
 package net.epixdude.memebot.util;
 
-public enum LogLevel{
-    INFO,
-    LOG,
-    WARNING,
-    ERROR
+public enum LogLevel {
+    INFO, LOG, WARNING, ERROR
 }
