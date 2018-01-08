@@ -1,5 +1,6 @@
 package net.epixdude.memebot.crypto;
 
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
 
@@ -82,7 +83,7 @@ public class CryptoData {
 
     @Override
     public String toString() {
-        final NumberFormat format = NumberFormat.getCurrencyInstance( Locale.US );
+        final DecimalFormat format = new DecimalFormat("$###,##0.00####");
         final double daychange = (getPrice() / getOpen() - 1.0) * 100.0;
         String data = currencyfullname + " Stats:";
         data += "\nprice: `" + format.format( getPrice() );

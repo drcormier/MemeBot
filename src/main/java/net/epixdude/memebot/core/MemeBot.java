@@ -24,6 +24,7 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.managers.AudioManager;
 import net.epixdude.memebot.crypto.Bitcoin;
 import net.epixdude.memebot.crypto.CryptoData;
+import net.epixdude.memebot.crypto.Dogecoin;
 import net.epixdude.memebot.crypto.Ethereum;
 import net.epixdude.memebot.crypto.Litecoin;
 import net.epixdude.memebot.util.BotCommand;
@@ -418,6 +419,15 @@ public class MemeBot extends ListenerAdapter{
                 		e.printStackTrace();
                 	}
                 	break;
+            case DOGECOIN:
+                	try{
+                		Dogecoin doge = new Dogecoin();
+                		CryptoData data = doge.getData();
+                		chan.sendMessage(data.toString()).queue();
+                	}catch(Exception e){
+                		e.printStackTrace();
+                	}
+                	break;
             case ILLUMINATI:
                 	playIlluminati(user);
                 	break;
@@ -518,6 +528,9 @@ public class MemeBot extends ListenerAdapter{
 
 		commands.put("litecoin",BotCommand.LITECOIN);
 		commandDescriptions.put(BotCommand.LITECOIN, "Gets the current litecoin price from GDAX.");
+
+		commands.put("dogecoin",BotCommand.DOGECOIN);
+		commandDescriptions.put(BotCommand.DOGECOIN, "Gets the current dogecoin price from CryptoCompare.");
 
     }
 

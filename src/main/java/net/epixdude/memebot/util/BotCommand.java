@@ -25,7 +25,8 @@ public enum BotCommand{
 	ETHER (false),
 	ILLUMINATI(false),
 	BITCOIN(false),
-	LITECOIN(false);
+	LITECOIN(false),
+	DOGECOIN(false);
 
     // constructor for saving restricted state
     BotCommand(boolean r){

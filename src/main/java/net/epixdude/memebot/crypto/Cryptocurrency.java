@@ -12,7 +12,7 @@ import org.json.JSONObject;
 
 public abstract class Cryptocurrency {
 
-    private static final String USER_AGENT = "Mozilla/5.0";
+    protected static final String USER_AGENT = "Mozilla/5.0";
     protected String TICKER_URL_STRING;
     protected String STATS_URL_STRING;
     protected String FULL_NAME;
