@@ -91,7 +91,7 @@ public class CryptoData {
         data += "`\nopen: `" + format.format( getOpen() );
         data += "`\nhigh: `" + format.format( getHigh() );
         data += "`\nlow: `" + format.format( getLow() );
-        data += String.format( "`\nvolume: `%,.2f " + currencyabbreviation + "(approx. $%,.2f)`", getVolume(),
+        data += String.format( "`\nvolume: `%,.2f " + currencyabbreviation + " (approx. $%,.2f)`", getVolume(),
                 getVolume() * getPrice() );
         return data;
     }

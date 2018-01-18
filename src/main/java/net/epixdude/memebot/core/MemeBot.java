@@ -1,7 +1,13 @@
 package net.epixdude.memebot.core;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import net.dv8tion.jda.core.AccountType;
@@ -23,7 +29,9 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.managers.AudioManager;
 import net.epixdude.memebot.crypto.Bitcoin;
+import net.epixdude.memebot.crypto.BulkCryptoCurrencyPriceGetter;
 import net.epixdude.memebot.crypto.CryptoData;
+import net.epixdude.memebot.crypto.Cryptocurrency;
 import net.epixdude.memebot.crypto.Dogecoin;
 import net.epixdude.memebot.crypto.Ethereum;
 import net.epixdude.memebot.crypto.Litecoin;
@@ -302,6 +310,21 @@ public class MemeBot extends ListenerAdapter{
 
         }
     }
+    
+    private void outputCryptoCurrency(MessageChannel mc, Cryptocurrency cc, double numberOfCoins) {
+        final DecimalFormat format = new DecimalFormat("$###,##0.00####");
+        try {
+            CryptoData data = cc.getData();
+            String output = data.toString();
+            if(!Double.isNaN( numberOfCoins )) {
+                output += "\nYour " + numberOfCoins + " " + data.getCurrencyabbreviation() + " is worth ";
+                output += "`" + format.format( data.getPrice()*numberOfCoins ) + "`";
+            }
+            mc.sendMessage( output ).queue();
+        } catch ( Exception e ) {
+            e.printStackTrace();
+        } 
+    }
 
     /**
      * Parse bot commands.
@@ -325,6 +348,8 @@ public class MemeBot extends ListenerAdapter{
         if(mems.contains(user)){
             bm = true;
         }
+        double count;
+        Cryptocurrency cc;
         // switch statements for readability
         switch(com){
             case AIRHORN_ON: // !MemeBot airhornON
@@ -393,41 +418,50 @@ public class MemeBot extends ListenerAdapter{
                 	}
                 	break;
             case ETHER:
-                	try{
-                		Ethereum eth = new Ethereum();
-                		CryptoData data = eth.getData();
-                		chan.sendMessage(data.toString()).queue();
-                	}catch(Exception e){
-                		e.printStackTrace();
-                	}
-                	break;
+                    try {
+                        count = Double.parseDouble( mess.getContentRaw().split( " " )[2] );
+                    } catch ( Exception e ) {
+                        count = Double.NaN;
+                    }
+                    cc = new Ethereum();
+                    outputCryptoCurrency( chan, cc, count );
+                    break;
             case BITCOIN:
-                	try{
-                		Bitcoin btc = new Bitcoin();
-                		CryptoData data = btc.getData();
-                		chan.sendMessage(data.toString()).queue();
-                	}catch(Exception e){
-                		e.printStackTrace();
-                	}
-                	break;
+                    try {
+                        count = Double.parseDouble( mess.getContentRaw().split( " " )[2] );
+                    } catch ( Exception e ) {
+                        count = Double.NaN;
+                    }
+                    cc = new Bitcoin();
+                    outputCryptoCurrency( chan, cc, count );
+                    break;
             case LITECOIN:
-                	try{
-                		Litecoin ltc = new Litecoin();
-                		CryptoData data = ltc.getData();
-                		chan.sendMessage(data.toString()).queue();
-                	}catch(Exception e){
-                		e.printStackTrace();
-                	}
-                	break;
+                    try {
+                        count = Double.parseDouble( mess.getContentRaw().split( " " )[2] );
+                    } catch ( Exception e ) {
+                        count = Double.NaN;
+                    }
+                    cc = new Litecoin();
+                    outputCryptoCurrency( chan, cc, count );
+                    break;
             case DOGECOIN:
-                	try{
-                		Dogecoin doge = new Dogecoin();
-                		CryptoData data = doge.getData();
-                		chan.sendMessage(data.toString()).queue();
-                	}catch(Exception e){
-                		e.printStackTrace();
-                	}
-                	break;
+                    try {
+                        count = Double.parseDouble( mess.getContentRaw().split( " " )[2] );
+                    } catch ( Exception e ) {
+                        count = Double.NaN;
+                    }
+                    cc = new Dogecoin();
+                    outputCryptoCurrency( chan, cc, count );
+                    break;
+            case CCPRICE:
+                    try {
+                        LinkedList<String> currencies = new LinkedList<>(Arrays.asList( mess.getContentRaw().split( " " ) ));
+                        currencies.removeFirst();
+                        currencies.removeFirst();
+                        chan.sendMessage( BulkCryptoCurrencyPriceGetter.getPrices( currencies ) ).queue();
+                    }catch (Exception e) {
+                        e.printStackTrace();
+                    }
             case ILLUMINATI:
                 	playIlluminati(user);
                 	break;
@@ -531,6 +565,9 @@ public class MemeBot extends ListenerAdapter{
 
 		commands.put("dogecoin",BotCommand.DOGECOIN);
 		commandDescriptions.put(BotCommand.DOGECOIN, "Gets the current dogecoin price from CryptoCompare.");
+		
+		commands.put( "ccprice", BotCommand.CCPRICE );
+		commandDescriptions.put( BotCommand.CCPRICE, "Gets the current price of any number of cryptocurrencies from CryptoCompare" );
 
     }
 
