@@ -1,5 +1,8 @@
 package net.epixdude.memebot.crypto;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,8 +25,22 @@ public class Portfolio {
      * @param amount
      *            the amount of coin to add
      */
-    protected void addCoin(String symbol, Double amount) {
-        currencies.put( symbol, amount );
+    protected String addCoin(String symbol, Double amount) {
+        try {
+            if(BulkCryptoCurrencyPriceGetter.isValidSymbol( symbol )) {
+                currencies.put( symbol, amount );
+                return "Successfully added " + amount.toString() + " " + symbol;
+            }else {
+                return symbol + " is not a valid symbol!";
+            }
+        } catch ( ProtocolException e ) {
+            e.printStackTrace();
+        } catch ( MalformedURLException e ) {
+            e.printStackTrace();
+        } catch ( IOException e ) {
+            e.printStackTrace();
+        }
+        return "An error has occured while adding that coin";
     }
 
     /**
@@ -39,7 +56,9 @@ public class Portfolio {
             final DecimalFormat format = new DecimalFormat( "$###,##0.00####" );
             Double sum = 0.0;
             for ( final String c : currencies.keySet() ) {
-                final Double value = currencies.get( c ) * priceData.get( c );
+                Double quantity = currencies.get( c );
+                Double price = priceData.get( c );
+                Double value = quantity*price;
                 sum += value;
                 output += "\nYour " + currencies.get( c ).toString() + " " + c + " is worth " + format.format( value );
             }

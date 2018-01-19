@@ -11,6 +11,7 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -118,6 +119,33 @@ public class BulkCryptoCurrencyPriceGetter {
         }
         output += "```";
         return output;
+    }
+    
+    protected static boolean isValidSymbol(String symbol) 
+            throws ProtocolException, IOException, MalformedURLException {
+        final URL statsURL = new URL( "https://min-api.cryptocompare.com/data/all/coinlist" );
+        final HttpURLConnection statsCon = (HttpURLConnection) statsURL.openConnection();
+        statsCon.setRequestMethod( "GET" );
+        statsCon.setRequestProperty( "User-Agent", USER_AGENT );
+        // get the data
+        final BufferedReader in = new BufferedReader( new InputStreamReader( statsCon.getInputStream() ) );
+        final StringBuffer response = new StringBuffer();
+
+        // read the data into a buffer
+        String inputLine;
+        while ( (inputLine = in.readLine()) != null ) {
+            response.append( inputLine );
+        }
+        in.close();
+        // parse the json
+        final JSONObject j = new JSONObject( response.toString() );
+        try {
+            j.getJSONObject( "Data" ).get( symbol );
+        }catch(JSONException jse){
+            return false;
+        }
+        return true;
+
     }
 
 }

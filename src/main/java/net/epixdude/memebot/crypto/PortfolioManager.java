@@ -1,54 +1,65 @@
 package net.epixdude.memebot.crypto;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.dv8tion.jda.core.entities.Member;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
+
 import net.dv8tion.jda.core.entities.MessageChannel;
 
 public class PortfolioManager {
 
-    private static Map<Member, Portfolio> portfolios = new ConcurrentHashMap<>();
+    private static Map<Long, Portfolio> portfolios = new ConcurrentHashMap<>();
+    private static final Type mapType = new TypeToken<Map<Long,Portfolio>>() {}.getType();
+    private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    /**
-     * Add a coin to a user's portfolio
-     * 
-     * @param owner
-     *            the owner of the portfolio
-     * @param symbol
-     *            the symbol of the coin to add
-     * @param amount
-     *            the amount of coin to add
-     */
-    public void addCoin(Member owner, String symbol, Double amount) {
-        portfolios.computeIfAbsent( owner, k -> new Portfolio() );
-        portfolios.get( owner ).addCoin( symbol, amount );
+    public String addCoin(Long idLong , String symbol, Double amount) {
+        portfolios.computeIfAbsent( idLong, k -> new Portfolio() );
+        return portfolios.get( idLong ).addCoin( symbol, amount );
     }
 
-    /**
-     * Checks a user's portfolio
-     * 
-     * @param owner
-     *            the owner of the portfolio
-     * @return the value of the portfolio, designed to be sent to a
-     *         {@link MessageChannel}
-     */
-    public String checkPortfolio(Member owner) {
-        portfolios.computeIfAbsent( owner, k -> new Portfolio() );
-        return portfolios.get( owner ).checkPortfolio();
+    public String checkPortfolio(Long idLong) {
+        portfolios.computeIfAbsent( idLong, k -> new Portfolio() );
+        return portfolios.get( idLong ).checkPortfolio();
     }
 
-    /**
-     * Remove a coin from a user's portfolio
-     * 
-     * @param owner
-     *            the owner of the portfolio
-     * @param symbol
-     *            the symbol of the coin to remove
-     */
-    public void removeCoin(Member owner, String symbol) {
-        portfolios.computeIfAbsent( owner, k -> new Portfolio() );
-        portfolios.get( owner ).removeCoin( symbol );
+    public void removeCoin(Long idLong, String symbol) {
+        portfolios.computeIfAbsent( idLong, k -> new Portfolio() );
+        portfolios.get( idLong ).removeCoin( symbol );
     }
+    
+    public void resetPortfolio(Long idLong) {
+        portfolios.put( idLong, new Portfolio() );
+    }
+    
+    public synchronized void savePortfolios() {
+        try(JsonWriter writer = new JsonWriter( new FileWriter( "pm.json" ) )){
+            gson.toJson( portfolios, mapType, writer );
+        }catch(IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public synchronized void loadPortfolios() {
+        try(JsonReader reader = new JsonReader( new FileReader( "pm.json" ) )){
+            portfolios = gson.fromJson( reader, mapType );
+            System.out.println( "Read in portfolios from pm.json" );
+        }catch(FileNotFoundException e) {
+            System.err.println( "pm.json does not exist." );
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+    }
+    
 
 }

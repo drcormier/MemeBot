@@ -196,6 +196,7 @@ public class MemeBot extends ListenerAdapter{
             jda.getPresence().setGame(Game.playing("with dank memes"));
             sb.append(Character.toChars(0x1F914));
             mbUser = (User)jda.getSelfUser();
+            portfolioManager.loadPortfolios();
         }
         catch(Exception e){
             e.printStackTrace();
@@ -471,13 +472,17 @@ public class MemeBot extends ListenerAdapter{
                     break;
             case PORTFOLIO:
                 	String[] o = mess.getContentRaw().split(" ");
+                	Long idLong = user.getUser().getIdLong();
                 	if(o.length < 3) {
-                	    chan.sendMessage( portfolioManager.checkPortfolio( user ) ).queue();
-                	}else if(o[2].equals( "add" ) && o.length == 5) {
-                	    portfolioManager.addCoin( user, o[3], Double.valueOf( o[4] ) );
-                	}else if(o[2].equals( "remove" ) && o.length == 4) {
-                	    portfolioManager.removeCoin( user, o[3] );
+                	    chan.sendMessage( portfolioManager.checkPortfolio( idLong ) ).queue();
+                	}else if(o[2].equals( "add" ) && o.length >= 5) {
+                	    chan.sendMessage( portfolioManager.addCoin( idLong, o[3], Double.valueOf( o[4] ) )).queue();
+                	}else if(o[2].equals( "remove" ) && o.length >= 4) {
+                	    portfolioManager.removeCoin( idLong, o[3] );
+                	}else if(o[2].equals( "reset" )) {
+                	    portfolioManager.resetPortfolio( idLong );
                 	}
+                	portfolioManager.savePortfolios();
                 	break;
                     
             case ILLUMINATI:
