@@ -42,7 +42,7 @@ public class BulkCryptoCurrencyPriceGetter {
 
     /**
      * Gets the price data for a set of cryptocurrencies
-     * 
+     *
      * @param currencies
      *            the symbols to look up the price for
      * @return the map of symbols to price
@@ -106,7 +106,7 @@ public class BulkCryptoCurrencyPriceGetter {
 
     /**
      * Formats a map of prices to a string suitable for printing
-     * 
+     *
      * @param priceData
      *            the map of price data
      * @return the string to be printed
@@ -120,9 +120,8 @@ public class BulkCryptoCurrencyPriceGetter {
         output += "```";
         return output;
     }
-    
-    protected static boolean isValidSymbol(String symbol) 
-            throws ProtocolException, IOException, MalformedURLException {
+
+    protected static boolean isValidSymbol(String symbol) throws ProtocolException, IOException, MalformedURLException {
         final URL statsURL = new URL( "https://min-api.cryptocompare.com/data/all/coinlist" );
         final HttpURLConnection statsCon = (HttpURLConnection) statsURL.openConnection();
         statsCon.setRequestMethod( "GET" );
@@ -141,7 +140,7 @@ public class BulkCryptoCurrencyPriceGetter {
         final JSONObject j = new JSONObject( response.toString() );
         try {
             j.getJSONObject( "Data" ).get( symbol );
-        }catch(JSONException jse){
+        } catch ( final JSONException jse ) {
             return false;
         }
         return true;

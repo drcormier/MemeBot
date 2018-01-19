@@ -14,15 +14,14 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
-import net.dv8tion.jda.core.entities.MessageChannel;
-
 public class PortfolioManager {
 
     private static Map<Long, Portfolio> portfolios = new ConcurrentHashMap<>();
-    private static final Type mapType = new TypeToken<Map<Long,Portfolio>>() {}.getType();
+    private static final Type mapType = new TypeToken<Map<Long, Portfolio>>() {
+    }.getType();
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    public String addCoin(Long idLong , String symbol, Double amount) {
+    public String addCoin(Long idLong, String symbol, Double amount) {
         portfolios.computeIfAbsent( idLong, k -> new Portfolio() );
         return portfolios.get( idLong ).addCoin( symbol, amount );
     }
@@ -32,34 +31,33 @@ public class PortfolioManager {
         return portfolios.get( idLong ).checkPortfolio();
     }
 
+    public synchronized void loadPortfolios() {
+        try ( JsonReader reader = new JsonReader( new FileReader( "pm.json" ) ) ) {
+            portfolios = gson.fromJson( reader, mapType );
+            System.out.println( "Read in portfolios from pm.json" );
+        } catch ( final FileNotFoundException e ) {
+            System.err.println( "pm.json does not exist." );
+        } catch ( final IOException e ) {
+            e.printStackTrace();
+        }
+
+    }
+
     public void removeCoin(Long idLong, String symbol) {
         portfolios.computeIfAbsent( idLong, k -> new Portfolio() );
         portfolios.get( idLong ).removeCoin( symbol );
     }
-    
+
     public void resetPortfolio(Long idLong) {
         portfolios.put( idLong, new Portfolio() );
     }
-    
+
     public synchronized void savePortfolios() {
-        try(JsonWriter writer = new JsonWriter( new FileWriter( "pm.json" ) )){
+        try ( JsonWriter writer = new JsonWriter( new FileWriter( "pm.json" ) ) ) {
             gson.toJson( portfolios, mapType, writer );
-        }catch(IOException e) {
+        } catch ( final IOException e ) {
             e.printStackTrace();
         }
     }
-    
-    public synchronized void loadPortfolios() {
-        try(JsonReader reader = new JsonReader( new FileReader( "pm.json" ) )){
-            portfolios = gson.fromJson( reader, mapType );
-            System.out.println( "Read in portfolios from pm.json" );
-        }catch(FileNotFoundException e) {
-            System.err.println( "pm.json does not exist." );
-        }catch (IOException e) {
-            e.printStackTrace();
-        }
-        
-    }
-    
 
 }

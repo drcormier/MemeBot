@@ -19,7 +19,7 @@ public class Portfolio {
 
     /**
      * Adds a coin to the portfolio.
-     * 
+     *
      * @param symbol
      *            the symbol of the coin to add
      * @param amount
@@ -27,17 +27,17 @@ public class Portfolio {
      */
     protected String addCoin(String symbol, Double amount) {
         try {
-            if(BulkCryptoCurrencyPriceGetter.isValidSymbol( symbol )) {
+            if ( BulkCryptoCurrencyPriceGetter.isValidSymbol( symbol ) ) {
                 currencies.put( symbol, amount );
                 return "Successfully added " + amount.toString() + " " + symbol;
-            }else {
+            } else {
                 return symbol + " is not a valid symbol!";
             }
-        } catch ( ProtocolException e ) {
+        } catch ( final ProtocolException e ) {
             e.printStackTrace();
-        } catch ( MalformedURLException e ) {
+        } catch ( final MalformedURLException e ) {
             e.printStackTrace();
-        } catch ( IOException e ) {
+        } catch ( final IOException e ) {
             e.printStackTrace();
         }
         return "An error has occured while adding that coin";
@@ -45,25 +45,29 @@ public class Portfolio {
 
     /**
      * Checks the value of the portfolio.
-     * 
+     *
      * @return a string representation of the portfolio, suitable for sending
      *         through a MessageChannel
      */
     protected String checkPortfolio() {
+        if ( currencies.isEmpty() ) {
+            return "Your portfolio is empty.";
+        }
         try {
             final Map<String, Double> priceData = BulkCryptoCurrencyPriceGetter.getPriceData( currencies.keySet() );
             String output = BulkCryptoCurrencyPriceGetter.getPrices( priceData );
             final DecimalFormat format = new DecimalFormat( "$###,##0.00####" );
             Double sum = 0.0;
             for ( final String c : currencies.keySet() ) {
-                Double quantity = currencies.get( c );
-                Double price = priceData.get( c );
-                Double value = quantity*price;
+                final Double quantity = currencies.get( c );
+                final Double price = priceData.get( c );
+                final Double value = quantity * price;
                 sum += value;
-                output += "\nYour " + currencies.get( c ).toString() + " " + c + " is worth " + format.format( value );
+                output += "\nYour `" + currencies.get( c ).toString() + "` " + c + " is worth `"
+                        + format.format( value ) + "`";
             }
-            output += "\nYour portfolio is worth ";
-            output += format.format( sum );
+            output += "\nYour portfolio is worth `";
+            output += format.format( sum ) + "`";
             return output;
         } catch ( final Exception e ) {
             e.printStackTrace();
@@ -73,7 +77,7 @@ public class Portfolio {
 
     /**
      * Removes a coin from the portfolio.
-     * 
+     *
      * @param symbol
      *            the symbol of the coin to remove
      */
