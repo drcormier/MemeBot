@@ -477,12 +477,21 @@ public class MemeBot extends ListenerAdapter{
                 	    chan.sendMessage( portfolioManager.checkPortfolio( idLong ) ).queue();
                 	}else if(o[2].equals( "add" ) && o.length >= 5) {
                 	    chan.sendMessage( portfolioManager.addCoin( idLong, o[3], Double.valueOf( o[4] ) )).queue();
+                        portfolioManager.savePortfolios();
                 	}else if(o[2].equals( "remove" ) && o.length >= 4) {
                 	    portfolioManager.removeCoin( idLong, o[3] );
+                        portfolioManager.savePortfolios();
                 	}else if(o[2].equals( "reset" )) {
                 	    portfolioManager.resetPortfolio( idLong );
+                        portfolioManager.savePortfolios();
+                	}else if(o[2].equals( "help" )) {
+                	    String help = "`!MemeBot portfolio help` prints this help message\n";
+                	    help += "`!MemeBot portfolio` prints the summary of your portfolio\n";
+                	    help += "`!MemeBot portfolio add SYMBOL amount` sets the amount of SYMBOL currency to amount\n";
+                	    help += "`!MemeBot portfolio remove SYMBOL` removes SYMBOL coin from your portfolio\n";
+                	    help += "`!MemeBot portfolio reset` resets your portfolio";
+                	    chan.sendMessage( help ).queue();
                 	}
-                	portfolioManager.savePortfolios();
                 	break;
                     
             case ILLUMINATI:
