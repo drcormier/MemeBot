@@ -8,6 +8,8 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,6 +48,22 @@ public class BulkCryptoCurrencyPriceGetter {
      */
     public static String getPrices(Iterable<String> currencies)
             throws ProtocolException, IOException, MalformedURLException {
+        Map<String,Double> priceData = getPriceData( currencies );
+        return getPrices( priceData );
+    }
+    
+    protected static String getPrices(Map<String,Double> priceData) {
+        String output = "```\n";
+        final DecimalFormat format = new DecimalFormat( "$###,##0.00####" );
+        for ( final String c : priceData.keySet() ) {
+            output += String.format( "%-8s", c + ":" ) + format.format( priceData.get( c ) ) + "\n";
+        }
+        output += "```";
+        return output;
+    }
+    
+    protected static Map<String,Double> getPriceData(Iterable<String> currencies)
+            throws ProtocolException, IOException, MalformedURLException {
         // build the url to use
         String urlToFetch = URL_FIRST_PART;
         // symbols are added as comma separated values
@@ -73,19 +91,12 @@ public class BulkCryptoCurrencyPriceGetter {
         in.close();
         // parse the json
         final JSONObject j = new JSONObject( response.toString() );
-        // see if the api returned an error. if so, send the error to the user
-        try {
-            return j.getString( "Message" );
-        } catch ( final JSONException jse ) {
+        Map<String,Double> priceData = new HashMap<>();
+        for( String c : j.keySet()) {
+            priceData.put( c, j.getJSONObject( c ).getDouble( USD ) );
         }
-        // take the json and build the output
-        String output = "```\n";
-        final DecimalFormat format = new DecimalFormat( "$###,##0.00####" );
-        for ( final String c : currencies ) {
-            output += String.format( "%-8s", c + ":" ) + format.format( j.getJSONObject( c ).getDouble( USD ) ) + "\n";
-        }
-        output += "```";
-        return output;
+        
+        return priceData;
     }
 
 }

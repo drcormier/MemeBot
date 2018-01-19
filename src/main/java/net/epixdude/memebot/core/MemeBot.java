@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
@@ -35,6 +36,7 @@ import net.epixdude.memebot.crypto.Cryptocurrency;
 import net.epixdude.memebot.crypto.Dogecoin;
 import net.epixdude.memebot.crypto.Ethereum;
 import net.epixdude.memebot.crypto.Litecoin;
+import net.epixdude.memebot.crypto.PortfolioManager;
 import net.epixdude.memebot.util.BotCommand;
 import net.epixdude.memebot.util.LogLevel;
 
@@ -169,6 +171,8 @@ public class MemeBot extends ListenerAdapter{
     private static User mbUser;
     
     private static Message owt = null;
+    
+    private static PortfolioManager portfolioManager = new PortfolioManager();
 
     public static void main(String[] args){
         boolean l = false;
@@ -455,13 +459,27 @@ public class MemeBot extends ListenerAdapter{
                     break;
             case CCPRICE:
                     try {
-                        LinkedList<String> currencies = new LinkedList<>(Arrays.asList( mess.getContentRaw().split( " " ) ));
+                        LinkedList<String> currencies = new LinkedList<>(Arrays.stream( mess.getContentRaw().split( " " ) )
+                                .map( (String s) -> s.toUpperCase() )
+                                .collect(Collectors.toList()));
                         currencies.removeFirst();
                         currencies.removeFirst();
                         chan.sendMessage( BulkCryptoCurrencyPriceGetter.getPrices( currencies ) ).queue();
                     }catch (Exception e) {
                         e.printStackTrace();
                     }
+                    break;
+            case PORTFOLIO:
+                	String[] o = mess.getContentRaw().split(" ");
+                	if(o.length < 3) {
+                	    chan.sendMessage( portfolioManager.checkPortfolio( user ) ).queue();
+                	}else if(o[2].equals( "add" ) && o.length == 5) {
+                	    portfolioManager.addCoin( user, o[3], Double.valueOf( o[4] ) );
+                	}else if(o[2].equals( "remove" ) && o.length == 4) {
+                	    portfolioManager.removeCoin( user, o[3] );
+                	}
+                	break;
+                    
             case ILLUMINATI:
                 	playIlluminati(user);
                 	break;
@@ -568,6 +586,9 @@ public class MemeBot extends ListenerAdapter{
 		
 		commands.put( "ccprice", BotCommand.CCPRICE );
 		commandDescriptions.put( BotCommand.CCPRICE, "Gets the current price of any number of cryptocurrencies from CryptoCompare" );
+		
+		commands.put( "portfolio", BotCommand.PORTFOLIO );
+		commandDescriptions.put( BotCommand.PORTFOLIO, "Performs various operations with your cryptocurrency portfolio." );
 
     }
 
