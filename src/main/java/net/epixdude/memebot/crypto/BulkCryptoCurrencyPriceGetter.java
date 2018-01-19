@@ -11,9 +11,13 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * A class that handles getting the prices of multiple cryptocurrencies from
+ * cryptocompare. Every method in this class is static.
+ *
+ */
 public class BulkCryptoCurrencyPriceGetter {
 
     // url patterns for the various parts of the cryptocompare api url
@@ -36,33 +40,16 @@ public class BulkCryptoCurrencyPriceGetter {
     private static final String USER_AGENT = "Mozilla/5.0";
 
     /**
-     * Gets the prices of various crpytocurrencies from CryptoCompare
-     *
+     * Gets the price data for a set of cryptocurrencies
+     * 
      * @param currencies
-     *            the case-sensitive symbols for cryptocurrencies the user wishes to
-     *            look up
-     * @return the message to print to the text channel
+     *            the symbols to look up the price for
+     * @return the map of symbols to price
      * @throws ProtocolException
      * @throws IOException
      * @throws MalformedURLException
      */
-    public static String getPrices(Iterable<String> currencies)
-            throws ProtocolException, IOException, MalformedURLException {
-        Map<String,Double> priceData = getPriceData( currencies );
-        return getPrices( priceData );
-    }
-    
-    protected static String getPrices(Map<String,Double> priceData) {
-        String output = "```\n";
-        final DecimalFormat format = new DecimalFormat( "$###,##0.00####" );
-        for ( final String c : priceData.keySet() ) {
-            output += String.format( "%-8s", c + ":" ) + format.format( priceData.get( c ) ) + "\n";
-        }
-        output += "```";
-        return output;
-    }
-    
-    protected static Map<String,Double> getPriceData(Iterable<String> currencies)
+    protected static Map<String, Double> getPriceData(Iterable<String> currencies)
             throws ProtocolException, IOException, MalformedURLException {
         // build the url to use
         String urlToFetch = URL_FIRST_PART;
@@ -91,12 +78,46 @@ public class BulkCryptoCurrencyPriceGetter {
         in.close();
         // parse the json
         final JSONObject j = new JSONObject( response.toString() );
-        Map<String,Double> priceData = new HashMap<>();
-        for( String c : j.keySet()) {
+        final Map<String, Double> priceData = new HashMap<>();
+        for ( final String c : j.keySet() ) {
             priceData.put( c, j.getJSONObject( c ).getDouble( USD ) );
         }
-        
+
         return priceData;
+    }
+
+    /**
+     * Gets the prices of various crpytocurrencies from CryptoCompare
+     *
+     * @param currencies
+     *            the case-sensitive symbols for cryptocurrencies the user wishes to
+     *            look up
+     * @return the message to print to the text channel
+     * @throws ProtocolException
+     * @throws IOException
+     * @throws MalformedURLException
+     */
+    public static String getPrices(Iterable<String> currencies)
+            throws ProtocolException, IOException, MalformedURLException {
+        final Map<String, Double> priceData = getPriceData( currencies );
+        return getPrices( priceData );
+    }
+
+    /**
+     * Formats a map of prices to a string suitable for printing
+     * 
+     * @param priceData
+     *            the map of price data
+     * @return the string to be printed
+     */
+    protected static String getPrices(Map<String, Double> priceData) {
+        String output = "```\n";
+        final DecimalFormat format = new DecimalFormat( "$###,##0.00####" );
+        for ( final String c : priceData.keySet() ) {
+            output += String.format( "%-8s", c + ":" ) + format.format( priceData.get( c ) ) + "\n";
+        }
+        output += "```";
+        return output;
     }
 
 }
