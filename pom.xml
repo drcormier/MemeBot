@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>MemeBot</groupId>
   <artifactId>MemeBot</artifactId>
-  <version>2.3.2</version>
+  <version>3.0.0</version>
   <name>MemeBot</name>
   <repositories>
      <repository>
