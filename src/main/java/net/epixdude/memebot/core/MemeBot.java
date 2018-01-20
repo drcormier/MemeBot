@@ -239,7 +239,7 @@ public class MemeBot extends ListenerAdapter{
         String[] message = s.split(" ");
         Member mem = m.getGuild().getMember(m.getAuthor());
         MessageChannel chan = m.getChannel();
-        if(message[0].equals(COMMAND) || message[0].equals(SHORTCOMMAND) || m.isMentioned(mbUser)){
+        if(message[0].equals(COMMAND) || message[0].equals(SHORTCOMMAND) || m.isMentioned(mbUser, Message.MentionType.USER)){
             if(commands.containsKey(message[1])){
                 printLogMessage(mem.getNickname() + " sent the command " + commands.get(message[1]));
                 parseCommands(commands.get(message[1]),mem,chan,m);
