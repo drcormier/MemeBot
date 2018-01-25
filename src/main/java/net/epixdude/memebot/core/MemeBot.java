@@ -1,14 +1,11 @@
 package net.epixdude.memebot.core;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.text.DecimalFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import net.dv8tion.jda.core.AccountType;
@@ -29,6 +26,7 @@ import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.managers.AudioManager;
+import net.epixdude.memebot.commands.CommandManager;
 import net.epixdude.memebot.crypto.Bitcoin;
 import net.epixdude.memebot.crypto.BulkCryptoCurrencyPriceGetter;
 import net.epixdude.memebot.crypto.CryptoData;
@@ -38,7 +36,6 @@ import net.epixdude.memebot.crypto.Ethereum;
 import net.epixdude.memebot.crypto.Litecoin;
 import net.epixdude.memebot.crypto.PortfolioManager;
 import net.epixdude.memebot.util.BotCommand;
-import net.epixdude.memebot.util.LogLevel;
 
 public class MemeBot extends ListenerAdapter{
 
@@ -49,8 +46,6 @@ public class MemeBot extends ListenerAdapter{
 	private static final String COMMAND = "!MemeBot";
 	private static final String SHORTCOMMAND = "!mb";
 
-    private final boolean log;
-    
     // the token associated with the bot
     private static String token;
     // the audiomanager for the guild
@@ -160,7 +155,8 @@ public class MemeBot extends ListenerAdapter{
     		"should I buy an AWP if the rest of my team is on an eco?"
     };
     // map of commands
-    private static HashMap<String,BotCommand> commands;
+    private static Set<String> commandList;
+    private static CommandManager cm;
     // map of command descriptions
     private static HashMap<BotCommand,String> commandDescriptions;
     
@@ -175,23 +171,19 @@ public class MemeBot extends ListenerAdapter{
     private static PortfolioManager portfolioManager = new PortfolioManager();
 
     public static void main(String[] args){
-        boolean l = false;
         if(args.length < 1){
             System.out.println("Usage: java -jar MemeBot.jar token");
             System.exit(1);
         }
         // add token from CLA
         token=args[0];
-        if(args.length == 2){
-            l=Boolean.parseBoolean(args[1]);
-        }
         // add commands to the maps
         addCommands();
         // build instance of JDA
         try{
             JDA jda = new JDABuilder(AccountType.BOT)
                     .setToken(token)
-                    .addEventListener(new MemeBot(l))
+                    .addEventListener(new MemeBot())
                     .buildBlocking();
             jda.getPresence().setGame(Game.playing("with dank memes"));
             sb.append(Character.toChars(0x1F914));
@@ -204,12 +196,8 @@ public class MemeBot extends ListenerAdapter{
     }
 
     public MemeBot(){
-        this.log=false;
     }
 
-    public MemeBot(boolean log){
-        this.log=log;
-    }
     
     /**
      * Do stuff when a user connects to a voice channel in a guild (discord server).
@@ -240,9 +228,16 @@ public class MemeBot extends ListenerAdapter{
         Member mem = m.getGuild().getMember(m.getAuthor());
         MessageChannel chan = m.getChannel();
         if(message[0].equals(COMMAND) || message[0].equals(SHORTCOMMAND) || m.isMentioned(mbUser, Message.MentionType.USER)){
-            if(message.length >= 2 && commands.containsKey(message[1])){
-                printLogMessage(mem.getNickname() + " sent the command " + commands.get(message[1]));
-                parseCommands(commands.get(message[1]),mem,chan,m);
+            if(message.length >= 2 ){
+                BotCommand bc = cm.getCommand( message[1] );
+                if(bc == null) {
+                    chan.sendMessage("ERROR: `" + s + "` is not a command!\nTo see a list of commands, type `!MemeBot commands`").queue();
+                }else if(bc == BotCommand.INVALID) {
+                    chan.sendMessage("ERROR: `" + s + "` is ambiguous!\nTo see a list of commands, type `!MemeBot commands`").queue();
+                }else {
+                    parseCommands(bc,mem,chan,m);
+                }
+                    
             }else{
                 chan.sendMessage("ERROR: `" + s + "` is not a command!\nTo see a list of commands, type `!MemeBot commands`").queue();
             }
@@ -544,64 +539,84 @@ public class MemeBot extends ListenerAdapter{
      */
     private static void addCommands(){
 		// initialize the hashmaps
-		commands = new HashMap<>();
+		commandList = new HashSet<>();
 		commandDescriptions = new HashMap<>();
+		cm = new CommandManager();
 		// add the commands
-		commands.put("airhornOn",BotCommand.AIRHORN_ON);
+		cm.addCommand("airhornOn",BotCommand.AIRHORN_ON);
+		commandList.add("airhornOn");
 		commandDescriptions.put(BotCommand.AIRHORN_ON, "Enable the airhorn functionality of MemeBot");
 
-		commands.put("airhornOff",BotCommand.AIRHORN_OFF);
+		cm.addCommand("airhornOff",BotCommand.AIRHORN_OFF);
+		commandList.add("airhornOff");
 		commandDescriptions.put(BotCommand.AIRHORN_OFF, "Disable the airhorn functionality of MemeBot");
 
-		commands.put("airhornStatus",BotCommand.AIRHORN_STATUS);
+		cm.addCommand("airhornStatus",BotCommand.AIRHORN_STATUS);
+		commandList.add("airhornStatus");
 		commandDescriptions.put(BotCommand.AIRHORN_STATUS, "Check the airhorn functionality status of MemeBot");
 
-		commands.put("commands",BotCommand.COMMAND_LIST);
+		cm.addCommand("commands",BotCommand.COMMAND_LIST);
+		commandList.add("commands");
 		commandDescriptions.put(BotCommand.COMMAND_LIST, "Print a list of MemeBot commands");
 
-		commands.put("shutdown",BotCommand.SHUTDOWN);
+		cm.addCommand("shutdown",BotCommand.SHUTDOWN);
+		commandList.add("shutdown");
 		commandDescriptions.put(BotCommand.SHUTDOWN, "Shut down MemeBot");
 
-		commands.put("airhornCommands",BotCommand.AIRHORN_COMMANDS);
+		cm.addCommand("airhornCommands",BotCommand.AIRHORN_COMMANDS);
+		commandList.add("airhornCommands");
 		commandDescriptions.put(BotCommand.AIRHORN_COMMANDS, "Print a list of Airhorn Solutions commands");
 
-		commands.put("com+desc",BotCommand.COMMANDS_DESCRIPTIONS);
+		cm.addCommand("com+desc",BotCommand.COMMANDS_DESCRIPTIONS);
+		commandList.add("com+desc");
 		commandDescriptions.put(BotCommand.COMMANDS_DESCRIPTIONS, "Prints a list of MemeBot commands and their descriptions");
 
-		commands.put("random",BotCommand.RANDOM_AIRHORN);
+		cm.addCommand("random",BotCommand.RANDOM_AIRHORN);
+		commandList.add("random");
 		commandDescriptions.put(BotCommand.RANDOM_AIRHORN, "Prints a random Airhorn Solutions command.");
 
-		commands.put("wtn",BotCommand.WTN);
+		cm.addCommand("wtn",BotCommand.WTN);
+		commandList.add("wtn");
 		commandDescriptions.put(BotCommand.WTN, "Wheres that nerd?");
 
-		commands.put("ricesb",BotCommand.RICESB);
+		cm.addCommand("ricesb",BotCommand.RICESB);
+		commandList.add("ricesb");
 		commandDescriptions.put(BotCommand.RICESB, "Convert string into a sequence of regional indicator and clap emojis.");
 
-		commands.put("del",BotCommand.DEL);
+		cm.addCommand("del",BotCommand.DEL);
+		commandList.add("del");
 		commandDescriptions.put(BotCommand.DEL, "Delete the n most recent messages from the channel.");
 
-		commands.put("test",BotCommand.TEST);
+		cm.addCommand("test",BotCommand.TEST);
+		commandList.add("test");
 		commandDescriptions.put(BotCommand.TEST, "A test command.");
 		
-		commands.put("ether",BotCommand.ETHER);
+		cm.addCommand("ether",BotCommand.ETHER);
+		commandList.add("ether");
 		commandDescriptions.put(BotCommand.ETHER, "Gets the current ethereum price from GDAX.");
 		
-		commands.put("illuminati",BotCommand.ILLUMINATI);
+		cm.addCommand("illuminati",BotCommand.ILLUMINATI);
+		commandList.add("illuminati");
 		commandDescriptions.put(BotCommand.ILLUMINATI, "Illuminati confirmed?");
 
-		commands.put("bitcoin",BotCommand.BITCOIN);
+		cm.addCommand("bitcoin",BotCommand.BITCOIN);
+		commandList.add("bitcoin");
 		commandDescriptions.put(BotCommand.BITCOIN, "Gets the current bitcoin price from GDAX.");
 
-		commands.put("litecoin",BotCommand.LITECOIN);
+		cm.addCommand("litecoin",BotCommand.LITECOIN);
+		commandList.add("litecoin");
 		commandDescriptions.put(BotCommand.LITECOIN, "Gets the current litecoin price from GDAX.");
 
-		commands.put("dogecoin",BotCommand.DOGECOIN);
+		cm.addCommand("dogecoin",BotCommand.DOGECOIN);
+		commandList.add("dogecoin");
 		commandDescriptions.put(BotCommand.DOGECOIN, "Gets the current dogecoin price from CryptoCompare.");
 		
-		commands.put( "ccprice", BotCommand.CCPRICE );
+		cm.addCommand( "ccprice", BotCommand.CCPRICE );
+		commandList.add("ccprice");
 		commandDescriptions.put( BotCommand.CCPRICE, "Gets the current price of any number of cryptocurrencies from CryptoCompare" );
 		
-		commands.put( "portfolio", BotCommand.PORTFOLIO );
+		cm.addCommand( "portfolio", BotCommand.PORTFOLIO );
+		commandList.add("portfolio");
 		commandDescriptions.put( BotCommand.PORTFOLIO, "Performs various operations with your cryptocurrency portfolio." );
 
     }
@@ -617,11 +632,12 @@ public class MemeBot extends ListenerAdapter{
         temp = temp + "*for descriptions of the commands, use* `!MemeBot com+desc`\n";
         temp = temp + "Current MemeBot commands:\n";
         // iterate over command strings
-        for(String c : commands.keySet()){
+        for(String c : commandList){
             /* add the commands to a temp string. If the command is restricted, the command will be underlined (surrounded by __ in discord markdown).
              * In addition, the command itself will be placed inside of a code block (surrounded by ` in discord).
              */
-            temp = temp + "\n" + (commands.get(c).isRestricted() ? "__" : "") + "`" +COMMAND + " " + c + "`" + (commands.get(c).isRestricted() ? "__" : "");
+            BotCommand com = cm.getCommand(c);
+            temp = temp + "\n" + (com.isRestricted() ? "__" : "") + "`" +COMMAND + " " + c + "`" + (com.isRestricted() ? "__" : "");
         }
         // send the message
         mc.sendMessage(temp).queue();
@@ -636,11 +652,12 @@ public class MemeBot extends ListenerAdapter{
         // see printCommands() for more code explanations
         String temp = "**NOTE:** If the command is __underlined__ then the command is restricted in use.\n";
         temp = temp + "Current MemeBot commands:\n";
-        for(String c : commands.keySet()){
-            temp = temp + "\n" + (commands.get(c).isRestricted() ? "__" : "") + "`" +COMMAND + " " + c + "`" + (commands.get(c).isRestricted() ? "__" : "");
+        for(String c : commandList){
+            BotCommand com = cm.getCommand(c);
+            temp = temp + "\n" + (com.isRestricted() ? "__" : "") + "`" +COMMAND + " " + c + "`" + (com.isRestricted() ? "__" : "");
             // add the descriptions for the commands (if they exist)
-            if(commandDescriptions.containsKey(commands.get(c))){
-                temp = temp + "\n" + "\t\t" + commandDescriptions.get(commands.get(c));
+            if(commandDescriptions.containsKey(com)){
+                temp = temp + "\n" + "\t\t" + commandDescriptions.get(com);
             }
         }
         mc.sendMessage(temp).queue();
@@ -731,30 +748,5 @@ public class MemeBot extends ListenerAdapter{
         }
     }
 
-    /**
-     * Log a message to the console.
-     * The message will take the format: [HH:mm:ss] [level] message
-     * @param level the level of the message
-     * @param message the message to be logged
-     */
-    private void printConsoleMessage(LogLevel level, String message){
-    	LocalDateTime date = LocalDateTime.now();
-        DateTimeFormatter form = DateTimeFormatter.ofPattern("HH:mm:ss");
-        String time = date.format(form);
-        String output = "[" + time + "] ";
-        output += "[" + level + "] ";
-        output += message;
-        System.out.println(output);
-    }
 
-    /**
-     * Log a message to the console, defaulting to the "LOG" level.
-     * The message will take the format: [HH:mm:ss] [LOG] message
-     * @param message the message to be logged
-     */
-    private void printLogMessage(String message){
-    	if(log){
-			printConsoleMessage(LogLevel.LOG,message);
-    	}
-    }
 }

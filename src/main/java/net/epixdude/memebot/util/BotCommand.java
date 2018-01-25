@@ -10,6 +10,7 @@ package net.epixdude.memebot.util;
  */
 public enum BotCommand{
     // current list of commands
+    INVALID (false),
     AIRHORN_ON (true),
     AIRHORN_OFF (true),
     AIRHORN_STATUS (false),
