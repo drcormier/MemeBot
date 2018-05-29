@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -54,13 +55,14 @@ public class Portfolio {
             return "Your portfolio is empty.";
         }
         try {
-            final Map<String, Double> priceData = BulkCryptoCurrencyPriceGetter.getPriceData( currencies.keySet() );
+            final List<CryptoData> priceData = BulkCryptoCurrencyPriceGetter.getPriceData( currencies.keySet() );
             String output = BulkCryptoCurrencyPriceGetter.getPrices( priceData );
             final DecimalFormat format = new DecimalFormat( "$###,##0.00####" );
             Double sum = 0.0;
             for ( final String c : currencies.keySet() ) {
                 final Double quantity = currencies.get( c );
-                final Double price = priceData.get( c );
+                final Double price = priceData.stream().filter(x -> x.getName().equals( c ))
+                        .mapToDouble( x -> x.getPrice() ).findFirst().getAsDouble();
                 final Double value = quantity * price;
                 sum += value;
                 output += "\nYour `" + currencies.get( c ).toString() + "` " + c + " is worth `"

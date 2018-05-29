@@ -23,11 +23,7 @@ public enum BotCommand{
     DEL (true),
     TEST (true),
 	WTN (false),
-	ETHER (false),
 	ILLUMINATI(false),
-	BITCOIN(false),
-	LITECOIN(false),
-	DOGECOIN(false),
 	CCPRICE(false),
 	PORTFOLIO(false);
 

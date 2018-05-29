@@ -27,13 +27,7 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.managers.AudioManager;
 import net.epixdude.memebot.commands.CommandManager;
-import net.epixdude.memebot.crypto.Bitcoin;
 import net.epixdude.memebot.crypto.BulkCryptoCurrencyPriceGetter;
-import net.epixdude.memebot.crypto.CryptoData;
-import net.epixdude.memebot.crypto.Cryptocurrency;
-import net.epixdude.memebot.crypto.Dogecoin;
-import net.epixdude.memebot.crypto.Ethereum;
-import net.epixdude.memebot.crypto.Litecoin;
 import net.epixdude.memebot.crypto.PortfolioManager;
 import net.epixdude.memebot.util.BotCommand;
 
@@ -311,21 +305,6 @@ public class MemeBot extends ListenerAdapter{
         }
     }
     
-    private void outputCryptoCurrency(MessageChannel mc, Cryptocurrency cc, double numberOfCoins) {
-        final DecimalFormat format = new DecimalFormat("$###,##0.00####");
-        try {
-            CryptoData data = cc.getData();
-            String output = data.toString();
-            if(!Double.isNaN( numberOfCoins )) {
-                output += "\nYour " + numberOfCoins + " " + data.getCurrencyabbreviation() + " is worth ";
-                output += "`" + format.format( data.getPrice()*numberOfCoins ) + "`";
-            }
-            mc.sendMessage( output ).queue();
-        } catch ( Exception e ) {
-            e.printStackTrace();
-        } 
-    }
-
     /**
      * Parse bot commands.
      * Takes in the bot commands and performs the expected actions.
@@ -349,7 +328,6 @@ public class MemeBot extends ListenerAdapter{
             bm = true;
         }
         double count;
-        Cryptocurrency cc;
         // switch statements for readability
         switch(com){
             case AIRHORN_ON: // !MemeBot airhornON
@@ -417,42 +395,6 @@ public class MemeBot extends ListenerAdapter{
                 		chan.sendMessage(tilt(chan)).queue();
                 	}
                 	break;
-            case ETHER:
-                    try {
-                        count = Double.parseDouble( mess.getContentRaw().split( " " )[2] );
-                    } catch ( Exception e ) {
-                        count = Double.NaN;
-                    }
-                    cc = new Ethereum();
-                    outputCryptoCurrency( chan, cc, count );
-                    break;
-            case BITCOIN:
-                    try {
-                        count = Double.parseDouble( mess.getContentRaw().split( " " )[2] );
-                    } catch ( Exception e ) {
-                        count = Double.NaN;
-                    }
-                    cc = new Bitcoin();
-                    outputCryptoCurrency( chan, cc, count );
-                    break;
-            case LITECOIN:
-                    try {
-                        count = Double.parseDouble( mess.getContentRaw().split( " " )[2] );
-                    } catch ( Exception e ) {
-                        count = Double.NaN;
-                    }
-                    cc = new Litecoin();
-                    outputCryptoCurrency( chan, cc, count );
-                    break;
-            case DOGECOIN:
-                    try {
-                        count = Double.parseDouble( mess.getContentRaw().split( " " )[2] );
-                    } catch ( Exception e ) {
-                        count = Double.NaN;
-                    }
-                    cc = new Dogecoin();
-                    outputCryptoCurrency( chan, cc, count );
-                    break;
             case CCPRICE:
                     try {
                         LinkedList<String> currencies = new LinkedList<>(Arrays.stream( mess.getContentRaw().split( " " ) )
@@ -591,26 +533,11 @@ public class MemeBot extends ListenerAdapter{
 		commandList.add("test");
 		commandDescriptions.put(BotCommand.TEST, "A test command.");
 		
-		cm.addCommand("ether",BotCommand.ETHER);
-		commandList.add("ether");
-		commandDescriptions.put(BotCommand.ETHER, "Gets the current ethereum price from GDAX.");
-		
+
 		cm.addCommand("illuminati",BotCommand.ILLUMINATI);
 		commandList.add("illuminati");
 		commandDescriptions.put(BotCommand.ILLUMINATI, "Illuminati confirmed?");
 
-		cm.addCommand("bitcoin",BotCommand.BITCOIN);
-		commandList.add("bitcoin");
-		commandDescriptions.put(BotCommand.BITCOIN, "Gets the current bitcoin price from GDAX.");
-
-		cm.addCommand("litecoin",BotCommand.LITECOIN);
-		commandList.add("litecoin");
-		commandDescriptions.put(BotCommand.LITECOIN, "Gets the current litecoin price from GDAX.");
-
-		cm.addCommand("dogecoin",BotCommand.DOGECOIN);
-		commandList.add("dogecoin");
-		commandDescriptions.put(BotCommand.DOGECOIN, "Gets the current dogecoin price from CryptoCompare.");
-		
 		cm.addCommand( "ccprice", BotCommand.CCPRICE );
 		commandList.add("ccprice");
 		commandDescriptions.put( BotCommand.CCPRICE, "Gets the current price of any number of cryptocurrencies from CryptoCompare" );

@@ -8,7 +8,9 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.json.JSONException;
@@ -27,9 +29,9 @@ public class BulkCryptoCurrencyPriceGetter {
     /**
      * The first half of the cyptocompare api url. A valid url should look like
      * this:
-     * https://min-api.cryptocompare.com/data/pricemulti?fsyms=ETH,DASH&tsyms=BTC,USD,EUR
+     * https://min-api.cryptocompare.com/data/pricemultifull?fsyms=ETH,DASH&tsyms=BTC,USD,EUR
      */
-    private static final String URL_FIRST_PART = "https://min-api.cryptocompare.com/data/pricemulti?fsyms=";
+    private static final String URL_FIRST_PART = "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=";
     // symbols for the cryptocurrency go between the above and below strings
     /**
      * The second half of the cyptocompare api url. A valid url should look like
@@ -39,6 +41,9 @@ public class BulkCryptoCurrencyPriceGetter {
     private static final String URL_SECOND_PART = "&tsyms=USD";
     private static final String USD = "USD";
     private static final String USER_AGENT = "Mozilla/5.0";
+    private static final String RAW = "RAW";
+    private static final String PRICE = "PRICE";
+    private static final String CHANGE = "CHANGEPCT24HOUR";
 
     /**
      * Gets the price data for a set of cryptocurrencies
@@ -50,7 +55,7 @@ public class BulkCryptoCurrencyPriceGetter {
      * @throws IOException
      * @throws MalformedURLException
      */
-    protected static Map<String, Double> getPriceData(Iterable<String> currencies)
+    protected static List<CryptoData> getPriceData( Iterable<String> currencies)
             throws ProtocolException, IOException, MalformedURLException {
         // build the url to use
         String urlToFetch = URL_FIRST_PART;
@@ -79,9 +84,14 @@ public class BulkCryptoCurrencyPriceGetter {
         in.close();
         // parse the json
         final JSONObject j = new JSONObject( response.toString() );
-        final Map<String, Double> priceData = new HashMap<>();
-        for ( final String c : j.keySet() ) {
-            priceData.put( c, j.getJSONObject( c ).getDouble( USD ) );
+        List<CryptoData> priceData = new ArrayList<>();
+        for ( final String c : currencies ) {
+            double price = j.getJSONObject( RAW ).getJSONObject( c )
+                    .getJSONObject( USD ).getDouble( PRICE );
+            double change = j.getJSONObject( RAW ).getJSONObject( c )
+                    .getJSONObject( USD ).getDouble( CHANGE );
+            CryptoData temp = new CryptoData( c, price, change );
+            priceData.add( temp );
         }
 
         return priceData;
@@ -100,7 +110,7 @@ public class BulkCryptoCurrencyPriceGetter {
      */
     public static String getPrices(Iterable<String> currencies)
             throws ProtocolException, IOException, MalformedURLException {
-        final Map<String, Double> priceData = getPriceData( currencies );
+        final List<CryptoData> priceData = getPriceData( currencies );
         return getPrices( priceData );
     }
 
@@ -111,11 +121,12 @@ public class BulkCryptoCurrencyPriceGetter {
      *            the map of price data
      * @return the string to be printed
      */
-    protected static String getPrices(Map<String, Double> priceData) {
+    protected static String getPrices(List<CryptoData> priceData) {
         String output = "```\n";
         final DecimalFormat format = new DecimalFormat( "$###,##0.00####" );
-        for ( final String c : priceData.keySet() ) {
-            output += String.format( "%-8s", c + ":" ) + format.format( priceData.get( c ) ) + "\n";
+        for ( CryptoData c : priceData ) {
+            output += String.format( "%-8s", c.getName() + ":" ) +
+                    format.format( c.getPrice() ) + String.format( " (%+.2f%%)", c.getChange() ) + "\n";
         }
         output += "```";
         return output;
