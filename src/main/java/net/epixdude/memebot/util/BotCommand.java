@@ -25,7 +25,8 @@ public enum BotCommand{
 	WTN (false),
 	ILLUMINATI(false),
 	CCPRICE(false),
-	PORTFOLIO(false);
+	PORTFOLIO(false),
+    CHART(false);
 
     // constructor for saving restricted state
     BotCommand(boolean r){

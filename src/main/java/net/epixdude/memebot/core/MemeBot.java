@@ -1,4 +1,5 @@
 package net.epixdude.memebot.core;
+import java.io.File;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,6 +29,7 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.managers.AudioManager;
 import net.epixdude.memebot.commands.CommandManager;
 import net.epixdude.memebot.crypto.BulkCryptoCurrencyPriceGetter;
+import net.epixdude.memebot.crypto.CryptoGraph;
 import net.epixdude.memebot.crypto.PortfolioManager;
 import net.epixdude.memebot.util.BotCommand;
 
@@ -434,8 +436,20 @@ public class MemeBot extends ListenerAdapter{
             case ILLUMINATI:
                 	playIlluminati(user);
                 	break;
+            case CHART:
+                    String[] p = mess.getContentRaw().split(" ");
+                    if(p.length != 3)
+                    {
+                        chan.sendMessage( "Usage: `!MemeBot chart SYMBOL`" ).queue();
+                    }
+                    else
+                    {
+                        chan.sendMessage( "Making a 24 hour price chart, please wait..." ).queue();
+                        CryptoGraph.graph( p[2], "graph.png" );
+                        chan.sendFile( new File( "graph.png" ) ).queue();
+                    }
 
-            	
+
         }
     }
     
@@ -545,6 +559,10 @@ public class MemeBot extends ListenerAdapter{
 		cm.addCommand( "portfolio", BotCommand.PORTFOLIO );
 		commandList.add("portfolio");
 		commandDescriptions.put( BotCommand.PORTFOLIO, "Performs various operations with your cryptocurrency portfolio." );
+
+        cm.addCommand( "chart", BotCommand.CHART );
+        commandList.add("chart");
+        commandDescriptions.put( BotCommand.PORTFOLIO, "Allows you to view a price chart for a cryptocurrency" );
 
     }
 
